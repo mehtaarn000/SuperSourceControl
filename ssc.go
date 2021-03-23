@@ -24,6 +24,9 @@ func main() {
 	}
 
 	switch args[1] {
+	case "init":
+		core.Init()
+
 	case "cat-file":
 		switch args[2] {
 		case "-s", "--size":
