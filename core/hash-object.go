@@ -54,6 +54,10 @@ func WriteFileHash(filename string, quiet bool) {
 
 	zlibutils.CompressFile(map[string]string{".ssc/objects/" + hash: hash})
 
+	if !quiet {
+		println(hash)
+	}
+
 	if err != nil {
 		panic(err)
 	}
