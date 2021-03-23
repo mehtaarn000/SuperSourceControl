@@ -12,6 +12,7 @@ Inner:
 const CommitUsage = `Usage of ssc commit:
 Flags:
 	-m [message] Write a commit message
+	-p Input a commit message
 	-e [editor] Specify an editor to write your commit message with
 	-f [file] Read a commit message from a file
 	-h Print this message`

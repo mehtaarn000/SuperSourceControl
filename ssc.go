@@ -7,6 +7,7 @@ import (
 	"time"
 	"os/exec"
 	"strconv"
+	"bufio"
 )
 
 func main() {
@@ -56,7 +57,24 @@ func main() {
 			commit := core.Commit{Tree:tree, Date:time.Now().Format(time.RFC3339), Message:args[3], Branch:string(file)}
 			core.CreateCommit(commit)
 		
-	
+		case "-p", "--prompt":
+			scanner := bufio.NewScanner(os.Stdin)
+
+			print("Input a commit message: ")
+			scanner.Scan()
+
+			input := scanner.Text()
+			
+			tree := core.CreateTree()
+			file, err := ioutil.ReadFile(".ssc/branch")
+
+			if err != nil {
+				panic(err)
+			}
+
+			commit := core.Commit{Tree:tree, Date:time.Now().Format(time.RFC3339), Message:input, Branch:string(file)}
+			core.CreateCommit(commit)
+
 		case "-e", "--editor":
 			//TODO add default editor
 			if len(args) < 4 {
@@ -126,7 +144,7 @@ func main() {
 		}
 	
 	case "hash-object":
-		if len(args) < 4 {
+		if len(args) < 4 && args[2] != "-h" && args[2] != "--help" {
 			panic("Minimum of 4 arguments required for ssc hash-object.")
 		}
 
@@ -135,7 +153,7 @@ func main() {
 			core.PrintStdinHash(string(args[3]))
 		
 		case "-ws", "--write-stdin":
-			if args[4] == "--quiet" {
+			if len(args) == 5 && args[4] == "--quiet" {
 				core.WriteStdinHash(string(args[3]), true)
 			} else {
 				core.WriteStdinHash(string(args[3]), false)
