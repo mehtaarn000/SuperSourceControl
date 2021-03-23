@@ -23,7 +23,7 @@ func reverseArray(input []string) []string {
 }
 
 // Log lists the commits from the commitlog
-func Log(commits int) {
+func Log(commits int, reverse bool) {
 	bytescommitlog, err := ioutil.ReadFile(".ssc/commitlog")
 	commitlog := strings.Split(string(bytescommitlog), "\n")
 	commitlog = commitlog[:len(commitlog)-1]
@@ -37,7 +37,11 @@ func Log(commits int) {
 		panic(err)
 	}
 
-	for _, commit := range reverseArray(requested_commits) {
+	if !reverse {
+		requested_commits = reverseArray(requested_commits)
+	}
+
+	for _, commit := range requested_commits {
 		content := getContent(commit)
 		split_content := strings.Split(content, "\n")
 

@@ -23,3 +23,8 @@ Flags:
 	-t, --type [object hash] Print an objects type
 	-z, --zlib-size [object hash] Print size of an encoded object
 	-h, --help Print this message`
+
+const LogUsage = `Usage of ssc log:
+Flags:
+	-n, --number [number of commits (int)] Print x many commits with the most recent being on the top
+	-r, --reverse [number of commits (int)] Print x many commits with the most recent being on the bottom`
