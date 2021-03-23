@@ -16,6 +16,9 @@ func main() {
 	if args[1] == "init" {
 		core.Init()
 		os.Exit(0)
+	} else if args[1] == "-h" || args[1] == "--help" {
+		println(core.Usage)
+		os.Exit(0)
 	}
 
 	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
