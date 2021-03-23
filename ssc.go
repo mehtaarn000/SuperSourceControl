@@ -13,6 +13,11 @@ import (
 func main() {
 	args := os.Args
 
+	if args[1] == "init" {
+		core.Init()
+		os.Exit(0)
+	}
+
 	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
 		panic("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
@@ -24,9 +29,6 @@ func main() {
 	}
 
 	switch args[1] {
-	case "init":
-		core.Init()
-
 	case "cat-file":
 		switch args[2] {
 		case "-s", "--size":
