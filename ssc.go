@@ -48,6 +48,16 @@ func main() {
 			println(core.CatFileUsage)
 		}
 	
+	case "branch":
+		switch args[2] {
+		case "-b":
+			if len(args) < 4 {
+				panic("Flag 'c' or 'create' requires a value.")
+			}
+
+			core.CreateBranch(args[3])
+ 		}
+
 	case "commit":
 		switch args[2] {
 		case "-m", "--message":
@@ -192,4 +202,3 @@ func main() {
 	}
 
 }
-
