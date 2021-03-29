@@ -133,7 +133,10 @@ func main() {
 			core.CreateCommit(commit)
 
 		case "-h", "--help":
-			print(core.CommitUsage)
+			println(core.CommitUsage)
+		
+		default:
+			println(core.CommitUsage)
 		}
 
 	case "log":
@@ -169,6 +172,9 @@ func main() {
 		
 		case "-mr", "--max-reverse":
 			core.MaxLog(true)
+
+		case "-h", "--help":
+			println(core.LogUsage)
 
 		default:
 			println(core.LogUsage)
