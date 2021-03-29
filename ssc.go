@@ -13,6 +13,11 @@ import (
 func main() {
 	args := os.Args
 
+	// Metadata
+	__version__ := "1.0"
+	__author__ := "mehtaarn000"
+	__github__ := "https://github.com/mehtaarn000/SuperSourceControl"
+
 	if args[1] == "init" {
 		core.Init()
 		os.Exit(0)
@@ -235,6 +240,15 @@ func main() {
 
 	case "help", "-h", "--help":
 		print(core.Usage)
+	
+	case "-v", "--version":
+		println(__version__)
+	
+	case "author":
+		println(__author__)
+
+	case "github":
+		println(__github__)
 
 	default:
 		print(core.Usage)
