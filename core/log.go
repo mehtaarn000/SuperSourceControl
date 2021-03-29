@@ -55,3 +55,18 @@ func Log(commits int, reverse bool) {
 	}
 }
 
+func MaxLog(reverse bool) {
+	bytescommitlog, err := ioutil.ReadFile(".ssc/commitlog")
+	numofcommits := len(strings.Split(string(bytescommitlog), "\n"))
+
+	if reverse {
+		Log(numofcommits - 1, true)
+		return
+	}
+
+	Log(numofcommits - 1, false)
+
+	if err != nil {
+		panic(err)
+	}
+}
