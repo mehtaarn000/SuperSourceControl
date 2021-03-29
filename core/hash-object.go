@@ -2,9 +2,9 @@ package core
 
 import (
 	"encoding/hex"
+	"golang.org/x/crypto/ripemd160"
 	"io/ioutil"
 	"ssc/zlibutils"
-	"golang.org/x/crypto/ripemd160"
 )
 
 func hashObject(s string) string {
@@ -25,7 +25,7 @@ func PrintStdinHash(s string) {
 // WriteStdinHash takes a string from stdin, turns it into a blob object, hashes it, and writes the object to the ssc database
 func WriteStdinHash(s string, quiet bool) {
 	value := hashObject(s)
-	ioutil.WriteFile(".ssc/objects/" + value, []byte(s), 0644)
+	ioutil.WriteFile(".ssc/objects/"+value, []byte(s), 0644)
 	zlibutils.CompressFile(map[string]string{".ssc/objects/" + value: value})
 
 	if !quiet {
@@ -50,7 +50,7 @@ func WriteFileHash(filename string, quiet bool) {
 	filecontent := string(bytesfilecontent)
 
 	hash := hashObject(filecontent)
-	ioutil.WriteFile(".ssc/objects/" + hash, bytesfilecontent, 0644)
+	ioutil.WriteFile(".ssc/objects/"+hash, bytesfilecontent, 0644)
 
 	zlibutils.CompressFile(map[string]string{".ssc/objects/" + hash: hash})
 

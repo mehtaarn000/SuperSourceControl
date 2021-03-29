@@ -38,7 +38,7 @@ Flags:
 	-ws, --write-stdin [string to hash and write to db] Write hash of stdin to ssc database
 	-f, --file [filename] Print hash of file
 	-wf, --write-file [filename] Write hash of file to ssc database
-	-h, --help Print this message` 
+	-h, --help Print this message`
 
 const RevertUsage = `Usage of ssc revert:
 Flags:

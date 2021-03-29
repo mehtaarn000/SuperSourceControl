@@ -1,18 +1,17 @@
 package core
 
 import (
-	"strings"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func create(p string) (*os.File, error) {
-    if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
-        return nil, err
-    }
-    return os.Create(p)
+	if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
+		return nil, err
+	}
+	return os.Create(p)
 }
-
 
 func RevertTo(hash string) {
 	get_commit := getContent(hash)
@@ -25,7 +24,7 @@ func RevertTo(hash string) {
 		// hash[0] = filename
 		// hash[1] = object hash
 		filenameToHash := strings.Split(content, " ")
-		
+
 		filecontent := getContent(filenameToHash[1])
 		writer, err := create(string(filenameToHash[0]))
 

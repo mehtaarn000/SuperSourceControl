@@ -5,21 +5,21 @@ import (
 	"strings"
 )
 
-func delete_empty (s []string) []string {
+func delete_empty(s []string) []string {
 	var r []string
 	for _, str := range s {
-        if str != "\n" {
-            r = append(r, str)
-        }
+		if str != "\n" {
+			r = append(r, str)
+		}
 	}
 	return r
 }
 
 func reverseArray(input []string) []string {
-    if len(input) == 0 {
-        return input
-    }
-    return append(reverseArray(input[1:]), input[0]) 
+	if len(input) == 0 {
+		return input
+	}
+	return append(reverseArray(input[1:]), input[0])
 }
 
 // Log lists the commits from the commitlog
@@ -60,11 +60,11 @@ func MaxLog(reverse bool) {
 	numofcommits := len(strings.Split(string(bytescommitlog), "\n"))
 
 	if reverse {
-		Log(numofcommits - 1, true)
+		Log(numofcommits-1, true)
 		return
 	}
 
-	Log(numofcommits - 1, false)
+	Log(numofcommits-1, false)
 
 	if err != nil {
 		panic(err)
