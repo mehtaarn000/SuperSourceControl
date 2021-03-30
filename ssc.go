@@ -23,6 +23,17 @@ func main() {
 	__author__ := "mehtaarn000"
 	__github__ := "https://github.com/mehtaarn000/SuperSourceControl"
 
+	// If the user runs 'ssc'
+	if len(args) < 2 {
+		print(core.Usage)
+		os.Exit(0)
+	}
+
+	if args[1] == "-h" || args[1] == "--help" {
+		println(core.Usage)
+		os.Exit(0)
+	}
+
 	// If the user runs 'init'
 	if args[1] == "init" {
 		core.Init()
@@ -32,12 +43,6 @@ func main() {
 	// If the .ssc directory does not exist
 	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
 		panic("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
-	}
-
-	// If the user runs 'ssc'
-	if len(args) < 2 {
-		print(core.Usage)
-		os.Exit(0)
 	}
 
 	switch args[1] {
