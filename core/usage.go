@@ -10,6 +10,7 @@ Standard:
 	commit [flags] (argument) [options] Create a commit
 	log [flags] (argument) List recent commits
 	init Initilize a repository
+	revert [flags] (argument) Revert repository to previous commit
 
 Inner:
 	cat-file [flags] (argument) Get information about ssc objects
