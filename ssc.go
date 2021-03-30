@@ -271,9 +271,18 @@ func main() {
 		switch args[2] {
 		// Create a new branch
 		case "-n", "--new":
-			core.CreateBranch(string(args[3]))		
-		}
-		
+			core.CreateBranch(string(args[3]))	
+			
+		case "-ns", "--new-switch":
+			core.CreateBranch(string(args[3]))
+			core.SwitchBranch(string(args[3]))
+
+		case "-h", "--help":
+			println(core.BranchUsage)
+
+		default:
+			println(core.BranchUsage)
+		}		
 
 	case "help", "-h", "--help":
 		print(core.Usage)
