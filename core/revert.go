@@ -6,18 +6,9 @@ Email : arnavm834@gmail.com
 package core
 
 import (
-	"os"
-	"path/filepath"
+	"ssc/utils"
 	"strings"
 )
-
-// Utility function to create files and directories recursively
-func create(p string) (*os.File, error) {
-	if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
-		return nil, err
-	}
-	return os.Create(p)
-}
 
 // RevertTo reverts the CWD to the tree of the hash passed
 // any uncommitted changes will be lost
@@ -37,7 +28,7 @@ func RevertTo(hash string) {
 
 		// Get content of each object and write it to a new file in the CWD
 		filecontent := getContent(filenameToHash[1])
-		writer, err := create(string(filenameToHash[0]))
+		writer, err := utils.Create(string(filenameToHash[0]))
 
 		writer.WriteString(filecontent)
 

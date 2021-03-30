@@ -8,7 +8,7 @@ package core
 import (
 	"io/ioutil"
 	"os"
-	"sort"
+	"ssc/utils"
 	"ssc/zlibutils"
 	"strings"
 )
@@ -46,7 +46,7 @@ func PrintType(hash string) {
 	}
 
 	commitlog := strings.Split(string(bytedata), "\n")
-	check := existInArray(hash, commitlog)
+	check := utils.ExistInArray(hash, commitlog)
 
 	if check == true {
 		println("commit")
@@ -56,7 +56,7 @@ func PrintType(hash string) {
 	blobbytes, err := ioutil.ReadFile(".ssc/blobs")
 
 	blobs := strings.Split(string(blobbytes), "\n")
-	check2 := existInArray(hash, blobs)
+	check2 := utils.ExistInArray(hash, blobs)
 
 	if check2 == true {
 		println("blob")
@@ -66,7 +66,7 @@ func PrintType(hash string) {
 	treebytes, err := ioutil.ReadFile(".ssc/trees")
 
 	trees := strings.Split(string(treebytes), "\n")
-	check3 := existInArray(hash, trees)
+	check3 := utils.ExistInArray(hash, trees)
 
 	if check3 == true {
 		println("tree")
@@ -98,14 +98,4 @@ func PrintZlibSize(hash string) {
 	}
 
 	println(file.Size())
-}
-
-// Utility function to check if a hash is in the log
-func existInArray(hash string, log []string) bool {
-	sort.Strings(log)
-	i := sort.SearchStrings(log, hash)
-	if i < len(log) && log[i] == hash {
-		return true
-	}
-	return false
 }

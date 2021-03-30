@@ -8,26 +8,8 @@ package core
 import (
 	"io/ioutil"
 	"strings"
+	"ssc/utils"
 )
-
-// Utility function to see if any item in the array is a newline, remove it
-func delete_empty(s []string) []string {
-	var r []string
-	for _, str := range s {
-		if str != "\n" {
-			r = append(r, str)
-		}
-	}
-	return r
-}
-
-// Exactly what is sounds like
-func reverseArray(input []string) []string {
-	if len(input) == 0 {
-		return input
-	}
-	return append(reverseArray(input[1:]), input[0])
-}
 
 // Log lists the commits from the commitlog
 func Log(commits int, reverse bool) {
@@ -41,14 +23,14 @@ func Log(commits int, reverse bool) {
 	}
 
 	// Get number of commits passed to function
-	requested_commits := commitlog[len(delete_empty(commitlog))-commits:]
+	requested_commits := commitlog[len(utils.DeleteEmpty(commitlog))-commits:]
 	if err != nil {
 		panic(err)
 	}
 
 	// If the user doesn't specify the reverse option
 	if !reverse {
-		requested_commits = reverseArray(requested_commits)
+		requested_commits = utils.ReverseArray(requested_commits)
 	}
 
 	for _, commit := range requested_commits {
