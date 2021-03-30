@@ -18,14 +18,13 @@ func main() {
 	__author__ := "mehtaarn000"
 	__github__ := "https://github.com/mehtaarn000/SuperSourceControl"
 
+	// If the user runs 'init'
 	if args[1] == "init" {
 		core.Init()
 		os.Exit(0)
-	} else if args[1] == "-h" || args[1] == "--help" {
-		println(core.Usage)
-		os.Exit(0)
 	}
 
+	// If the .ssc directory does not exist
 	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
 		panic("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
@@ -43,6 +42,7 @@ func main() {
 			panic("Command 'cat-file' requires a flag and argument")
 		}
 
+		// Print function's output and exits
 		switch args[2] {
 		case "-s", "--size":
 			core.PrintSize(args[3])
@@ -60,10 +60,11 @@ func main() {
 
 	case "revert":
 
+		// Revert CWD to a previous commit
 		if args[2] == "" {
-			panic("Command 'log' requires a flag and argument")
+			panic("Command 'revert' requires a flag and argument")
 		}
-
+		
 		switch args[2] {
 		case "-n":
 			core.RevertTo(string(args[3]))
@@ -82,6 +83,7 @@ func main() {
 		}
 
 		switch args[2] {
+		// Specify a message, create a commit with given message, and output the new commit hash
 		case "-m", "--message":
 			if len(args) < 4 {
 				panic("Flag 'm' or 'message' requires a value.")
@@ -98,6 +100,7 @@ func main() {
 			core.CreateCommit(commit)
 
 		case "-p", "--prompt":
+			// Input a message
 			scanner := bufio.NewScanner(os.Stdin)
 
 			print("Input a commit message: ")
@@ -116,6 +119,9 @@ func main() {
 			core.CreateCommit(commit)
 
 		case "-e", "--editor":
+			// Open editor with file: .ssc/tmp/message.txt
+			// Message is read from file when editor is exited
+			// Create a commit with this message
 			//TODO add default editor
 			if len(args) < 4 {
 				panic("Flag 'e' or 'editor' requires a value.")
@@ -166,6 +172,7 @@ func main() {
 		}
 
 		switch args[2] {
+		// Log n number of commits
 		case "-n", "--number":
 
 			if args[3] == "" {
@@ -180,7 +187,7 @@ func main() {
 			}
 
 		case "-r", "--reverse":
-
+			// Log n number of commits from first to last
 			if args[3] == "" {
 				panic("Flag 'r' or 'reverse' requires a value.")
 			}
@@ -193,9 +200,11 @@ func main() {
 			}
 
 		case "-m", "--max":
+			// Log all commits
 			core.MaxLog(false)
 
 		case "-mr", "--max-reverse":
+			// Log all commits backwards
 			core.MaxLog(true)
 
 		case "-h", "--help":
@@ -211,19 +220,23 @@ func main() {
 		}
 
 		switch args[2] {
+		// Create hash from stdin
 		case "-s", "--stdin":
 			core.PrintStdinHash(string(args[3]))
-
+		
+		// Create object from stdin
 		case "-ws", "--write-stdin":
 			if len(args) == 5 && args[4] == "--quiet" {
 				core.WriteStdinHash(string(args[3]), true)
 			} else {
 				core.WriteStdinHash(string(args[3]), false)
 			}
-
+		
+		// Create hash from file
 		case "-f", "--file":
 			core.PrintFileHash(string(args[3]))
-
+		
+		// Create object from file
 		case "-wf", "--write-file":
 			if args[4] == "--quiet" {
 				core.WriteFileHash(string(args[3]), true)
