@@ -55,4 +55,6 @@ const BranchUsage = `Usage of ssc branch:
 Flags:
 	-n, --new [branch name] Create branch with argument as name
 	-ns, --new-switch [branch name] Create and switch to branch with argument as name
+	-s, --switch [branch name] Switch branches
+	-d, -D, --delete [branch name] [--force] Delete a branch (without the force option, ssc prompts the user if they want to proceed with the action)
 	-h, --help Print this message`
