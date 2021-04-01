@@ -264,6 +264,7 @@ func main() {
 
 	case "branch":
 
+		
 		if len(args) < 3 {
 			panic("Command 'branch' requires a flag and an argument.")
 		}

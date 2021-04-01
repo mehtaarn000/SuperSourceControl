@@ -58,7 +58,7 @@ func CreateCommit(c Commit) {
 	f.WriteString(hash + "\n")
 
 	// Write commit to commitlog
-	writeToLog, err := os.OpenFile(".ssc/commitlog", os.O_APPEND|os.O_WRONLY, 0644)
+	writeToLog, err := os.OpenFile(".ssc/branches/" + c.Branch + "/commitlog", os.O_APPEND|os.O_WRONLY, 0644)
 	defer writeToLog.Close()
 	writeToLog.WriteString(hash + "\n")
 
