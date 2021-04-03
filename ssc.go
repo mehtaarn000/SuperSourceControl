@@ -37,8 +37,18 @@ func main() {
 
 	// If the user runs 'init'
 	if args[1] == "init" {
-		core.Init()
-		os.Exit(0)
+		if len(args) > 3 {
+
+			switch args[2] {
+			case "-b", "--branch-name":
+				core.Init(args[3])
+				os.Exit(0)
+			}
+		} else {
+			default_branch := core.GetSetting("defaultBranch")
+			core.Init(default_branch)
+			os.Exit(0)
+		}
 	}
 
 	// If the .ssc directory does not exist
@@ -88,7 +98,8 @@ func main() {
 		switch args[2] {
 		// Get a setting
 		case "-s", "--setting":
-			core.GetSetting(args[3])
+			setting := core.GetSetting(args[3])
+			println(setting)
 		
 		// Change a setting
 		case "-c", "--change-setting":
@@ -148,7 +159,9 @@ func main() {
 			// Input a message
 			scanner := bufio.NewScanner(os.Stdin)
 
-			print("Input a commit message: ")
+			prompt_message := core.GetSetting("commitMessagePrompt")
+
+			print(prompt_message)
 			scanner.Scan()
 
 			input := scanner.Text()
@@ -317,7 +330,11 @@ func main() {
 			core.SwitchBranch(args[3])
 		
 		case "-d", "-D", "--delete":
+			force_deletion_setting := core.GetSetting("forceBranchDeletion")
+
 			if len(args) == 5 && args[4] == "--force" {
+				core.DeleteBranch(args[3], true)
+			} else if force_deletion_setting == "true" {
 				core.DeleteBranch(args[3], true)
 			} else {
 				core.DeleteBranch(args[3], false)

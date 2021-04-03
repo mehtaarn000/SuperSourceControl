@@ -9,7 +9,7 @@ import (
 )
 
 // GetSetting gets the passed setting from the .sscconfig.json file in home directory
-func GetSetting(setting string) {
+func GetSetting(setting string) string {
 	// Get .sscconfig.json file from home directory
 	homedir, err := os.UserHomeDir()
 	get_settings, err := ioutil.ReadFile(homedir + "/.sscconfig.json")
@@ -34,7 +34,7 @@ func GetSetting(setting string) {
 		panic(err)
 	}
 
-	println(value.(string))
+	return value.(string)
 }
 
 // ChangeSetting changes a setting in the .sscconfig.json file in home directory
@@ -63,6 +63,7 @@ func DefaultSettings(force bool) {
 	// Get .sscconfig.json file from home directory
 	homedir, err := os.UserHomeDir()
 
+	// Aliases may be implemented in the future
 	defaultSettings := `{
 	"defaultBranch": "master",
 	"aliases": {},
