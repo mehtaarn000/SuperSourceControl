@@ -48,7 +48,8 @@ func main() {
 
 	homedir, err := os.UserHomeDir()
 	if !utils.FileExists(homedir + "/.sscconfig.json") {
-		panic("~/.sscconfig.json does not exist.")
+		println("Creating the missing $HOME/.sscconfig.json file with default settings.")
+		core.DefaultSettings(true)
 	}
 
 	if err != nil {
@@ -85,11 +86,21 @@ func main() {
 		}
 
 		switch args[2] {
+		// Get a setting
 		case "-s", "--setting":
 			core.GetSetting(args[3])
-
+		
+		// Change a setting
 		case "-c", "--change-setting":
 			core.ChangeSetting(args[3], args[4])
+		
+		// Restore settings to default
+		case "-d", "--default":
+			if len(args) == 4 && args[3] == "--force" {
+				core.DefaultSettings(true)
+			} else {
+				core.DefaultSettings(false)
+			}
 		}
 
 	case "revert":
