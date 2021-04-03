@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"ssc/core"
+	"ssc/utils"
 	"strconv"
 	"time"
 )
@@ -43,6 +44,15 @@ func main() {
 	// If the .ssc directory does not exist
 	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
 		panic("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
+	}
+
+	homedir, err := os.UserHomeDir()
+	if !utils.FileExists(homedir + "/.sscconfig.json") {
+		panic("~/.sscconfig.json does not exist.")
+	}
+
+	if err != nil {
+		panic(err)
 	}
 
 	switch args[1] {
