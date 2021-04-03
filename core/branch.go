@@ -8,6 +8,17 @@ import (
 	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
+func validateBranchName(name string) bool {
+	newmatcher, err := pcre.Compile("^(?!/|.*([/.]\\.|//|@\\{|\\\\))[^\040\177 ~^:?*\\[]+(?<!\\.lock|[/.])$", 0)
+	match := newmatcher.Matcher([]byte(name), 0).MatchString(name, 0)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return match
+}
+
 func CreateBranch(name string) {
 	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
 		if os.IsExist(err) {
@@ -24,8 +35,7 @@ func CreateBranch(name string) {
 		panic("At least 1 commit must be made on the default branch before new branches can be created.")
 	}
 
-	newmatcher, rerr := pcre.Compile("^(?!/|.*([/.]\\.|//|@\\{|\\\\))[^\040\177 ~^:?*\\[]+(?<!\\.lock|[/.])$", 0)
-	match := newmatcher.Matcher([]byte(name), 0).MatchString(name, 0)
+	match := validateBranchName(name)
 
 	if !match {
 		panic("Invalid branch name: '" + name + "'")
@@ -36,10 +46,6 @@ func CreateBranch(name string) {
 	defer f.Close()
 
 	f.WriteString(head + "\n")
-
-	if rerr != nil {
-		panic(err)
-	} 
 
 	if err != nil {
 		panic(err)
