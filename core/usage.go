@@ -11,6 +11,7 @@ Standard:
 	log [flags] (argument) List recent commits
 	init Initilize a repository
 	revert [flags] (argument) Revert repository to previous commit
+	config [flags] (argument) Handle the ssc configuration file
 
 Inner:
 	cat-file [flags] (argument) Get information about ssc objects
@@ -57,4 +58,11 @@ Flags:
 	-ns, --new-switch [branch name] Create and switch to branch with argument as name
 	-s, --switch [branch name] Switch branches
 	-d, -D, --delete [branch name] [--force] Delete a branch (without the force option, ssc prompts the user if they want to proceed with the action)
+	-h, --help Print this message`
+
+const ConfigUsage = `Usage of ssc config:
+Flags:
+	-s, --setting [setting] Get a setting
+	-c, --change-setting [setting] [new value] Change a setting
+	-d, --default [--force] Restore settings to default (without the force option, ssc prompts the user if they want to proceed with the action)
 	-h, --help Print this message`

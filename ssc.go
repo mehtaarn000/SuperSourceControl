@@ -26,7 +26,7 @@ func main() {
 
 	// If the user runs 'ssc'
 	if len(args) < 2 {
-		print(core.Usage)
+		println(core.Usage)
 		os.Exit(0)
 	}
 
@@ -112,6 +112,12 @@ func main() {
 			} else {
 				core.DefaultSettings(false)
 			}
+		
+		case "-h", "--help":
+			println(core.ConfigUsage)
+
+		default:
+			println(core.ConfigUsage)
 		}
 
 	case "revert":
