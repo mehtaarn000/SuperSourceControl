@@ -100,11 +100,11 @@ func main() {
 		case "-s", "--setting":
 			setting := core.GetSetting(args[3])
 			println(setting)
-		
+
 		// Change a setting
 		case "-c", "--change-setting":
 			core.ChangeSetting(args[3], args[4])
-		
+
 		// Restore settings to default
 		case "-d", "--default":
 			if len(args) == 4 && args[3] == "--force" {
@@ -112,7 +112,7 @@ func main() {
 			} else {
 				core.DefaultSettings(false)
 			}
-		
+
 		case "-h", "--help":
 			println(core.ConfigUsage)
 
@@ -126,7 +126,7 @@ func main() {
 		if len(args) < 3 {
 			panic("Command 'revert' requires a flag and an argument.")
 		}
-		
+
 		switch args[2] {
 		case "-n":
 			core.RevertTo(string(args[3]))
@@ -288,7 +288,7 @@ func main() {
 		// Create hash from stdin
 		case "-s", "--stdin":
 			core.PrintStdinHash(string(args[3]))
-		
+
 		// Create object from stdin
 		case "-ws", "--write-stdin":
 			if len(args) == 5 && args[4] == "--quiet" {
@@ -296,11 +296,11 @@ func main() {
 			} else {
 				core.WriteStdinHash(string(args[3]), false)
 			}
-		
+
 		// Create hash from file
 		case "-f", "--file":
 			core.PrintFileHash(string(args[3]))
-		
+
 		// Create object from file
 		case "-wf", "--write-file":
 			if args[4] == "--quiet" {
@@ -318,7 +318,6 @@ func main() {
 
 	case "branch":
 
-		
 		if len(args) < 3 {
 			panic("Command 'branch' requires a flag and an argument.")
 		}
@@ -326,15 +325,15 @@ func main() {
 		switch args[2] {
 		// Create a new branch
 		case "-n", "--new":
-			core.CreateBranch(args[3])	
-			
+			core.CreateBranch(args[3])
+
 		case "-ns", "--new-switch":
 			core.CreateBranch(args[3])
 			core.SwitchBranch(args[3])
 
 		case "-s", "--switch":
 			core.SwitchBranch(args[3])
-		
+
 		case "-d", "-D", "--delete":
 			force_deletion_setting := core.GetSetting("forceBranchDeletion")
 
@@ -351,14 +350,14 @@ func main() {
 
 		default:
 			println(core.BranchUsage)
-		}		
+		}
 
 	case "help", "-h", "--help":
 		print(core.Usage)
-	
+
 	case "-v", "--version":
 		println(__version__)
-	
+
 	case "author":
 		println(__author__)
 

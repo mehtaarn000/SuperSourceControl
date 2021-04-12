@@ -2,10 +2,10 @@ package core
 
 import (
 	"bufio"
+	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 	"io/ioutil"
 	"os"
 	"strings"
-	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
 func validateBranchName(name string) bool {
@@ -41,7 +41,7 @@ func CreateBranch(name string) {
 		panic("Invalid branch name: '" + name + "'")
 	}
 
-	err = os.Mkdir(".ssc/branches/" + name, 0777)
+	err = os.Mkdir(".ssc/branches/"+name, 0777)
 	f, err := os.Create(".ssc/branches/" + name + "/commitlog")
 	defer f.Close()
 
@@ -110,7 +110,7 @@ func DeleteBranch(name string, force bool) {
 				break
 			}
 		}
-		
+
 		if confirm == "Y" || confirm == "y" {
 			err := os.RemoveAll(".ssc/branches/" + name)
 
@@ -124,7 +124,7 @@ func DeleteBranch(name string, force bool) {
 	}
 
 	err = os.RemoveAll(".ssc/branches/" + name)
-	
+
 	if err != nil {
 		panic(err)
 	}

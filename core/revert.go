@@ -6,8 +6,8 @@ Email : arnavm834@gmail.com
 package core
 
 import (
-	"ssc/utils"
 	"os"
+	"ssc/utils"
 	"strings"
 )
 
@@ -32,8 +32,8 @@ func RevertTo(hash string) {
 		items := strings.Split(filehash, " ")
 		filesintree = append(filesintree, items[0])
 		hashes = append(hashes, items[1])
-	} 
-	
+	}
+
 	// Get all files not in currentworking directory
 	notincwd := utils.Intersection(filesintree, cwdfiles)
 
@@ -58,7 +58,7 @@ func RevertTo(hash string) {
 			}
 		}
 	}
-	
+
 	// Create needed files
 	for i, hash := range hashes {
 		filecontent := getContent(hash)
