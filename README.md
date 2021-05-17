@@ -6,7 +6,7 @@ A local version control system written in Go. I built this as a way to introduce
 git clone https://github.com/mehtaarn000/SuperSourceControl
 go build ssc.go
 ```
-Then, move the `ssc` executable to somewhere in your path.
+Then, move the `ssc` executable to somewhere in your $PATH.
 
 ## Quickstart
 To start a project:
