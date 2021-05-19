@@ -3,9 +3,11 @@ package core
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/tidwall/sjson"
 	"io/ioutil"
 	"os"
+	"ssc/utils"
+
+	"github.com/tidwall/sjson"
 )
 
 // GetSetting gets the passed setting from the .sscconfig.json file in home directory
@@ -19,7 +21,7 @@ func GetSetting(setting string) string {
 	// Unmarshal/parse data and store it in objmap
 	var objmap map[string]interface{}
 	if err := json.Unmarshal(data, &objmap); err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	// to parse setting
@@ -27,11 +29,11 @@ func GetSetting(setting string) string {
 
 	// map[value that doesn't exist] returns an empty string
 	if value == "" || value == "\n" {
-		panic("Setting '" + setting + "' doesn't exist.")
+		utils.Exit("Setting '" + setting + "' doesn't exist.")
 	}
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	return value.(string)
@@ -43,7 +45,7 @@ func ChangeSetting(setting string, new_setting string) {
 	// If the user changes the default branch setting, validate the new branch name
 	if setting == "defaultBranch" {
 		if !validateBranchName(new_setting) {
-			panic("Invalid branch name: '" + new_setting + "'")
+			utils.Exit("Invalid branch name: '" + new_setting + "'")
 		}
 
 	}
@@ -56,7 +58,7 @@ func ChangeSetting(setting string, new_setting string) {
 	newsettings, jsonerr := sjson.Set(string(get_settings), setting, new_setting)
 
 	if jsonerr != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	// Write new settings back to config file
@@ -64,7 +66,7 @@ func ChangeSetting(setting string, new_setting string) {
 	writer.WriteString(newsettings)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }
 
@@ -96,7 +98,7 @@ func DefaultSettings(force bool) {
 			writer, err := os.Create(homedir + "/.sscconfig.json")
 			writer.WriteString(defaultSettings)
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 		} else {
@@ -108,6 +110,6 @@ func DefaultSettings(force bool) {
 	writer.WriteString(defaultSettings)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }

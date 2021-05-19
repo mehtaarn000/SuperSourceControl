@@ -53,7 +53,7 @@ func main() {
 
 	// If the .ssc directory does not exist
 	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
-		panic("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
+		utils.Exit("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
 
 	homedir, err := os.UserHomeDir()
@@ -63,14 +63,14 @@ func main() {
 	}
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	switch args[1] {
 	case "cat-file":
 
 		if len(args) < 3 {
-			panic("Command 'cat-file' requires a flag and an argument.")
+			utils.Exit("Command 'cat-file' requires a flag and an argument.")
 		}
 
 		// Print function's output and exits
@@ -92,7 +92,7 @@ func main() {
 	case "config":
 
 		if len(args) < 3 && args[2] != "-c" && args[2] != "--change-setting" {
-			panic("Command 'config' requires a flag and an argument.")
+			utils.Exit("Command 'config' requires a flag and an argument.")
 		}
 
 		switch args[2] {
@@ -124,7 +124,7 @@ func main() {
 		// Revert CWD to a previous commit
 
 		if len(args) < 3 {
-			panic("Command 'revert' requires a flag and an argument.")
+			utils.Exit("Command 'revert' requires a flag and an argument.")
 		}
 
 		switch args[2] {
@@ -141,21 +141,21 @@ func main() {
 	case "commit":
 
 		if len(args) < 3 {
-			panic("Command 'commit' requires a flag and an argument.")
+			utils.Exit("Command 'commit' requires a flag and an argument.")
 		}
 
 		switch args[2] {
 		// Specify a message, create a commit with given message, and output the new commit hash
 		case "-m", "--message":
 			if len(args) < 4 {
-				panic("Flag 'm' or 'message' requires a value.")
+				utils.Exit("Flag 'm' or 'message' requires a value.")
 			}
 
 			tree := core.CreateTree()
 			file, err := ioutil.ReadFile(".ssc/branch")
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: args[3], Branch: string(file)}
@@ -176,7 +176,7 @@ func main() {
 			file, err := ioutil.ReadFile(".ssc/branch")
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: input, Branch: string(file)}
@@ -188,7 +188,7 @@ func main() {
 			// Create a commit with this message
 			//TODO add default editor
 			if len(args) < 4 {
-				panic("Flag 'e' or 'editor' requires a value.")
+				utils.Exit("Flag 'e' or 'editor' requires a value.")
 			}
 
 			cmd := exec.Command(args[3], ".ssc/tmp/message.txt")
@@ -198,7 +198,7 @@ func main() {
 			message, err := ioutil.ReadFile(".ssc/tmp/message.txt")
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 			tree := core.CreateTree()
@@ -208,14 +208,14 @@ func main() {
 		case "-f", "--file":
 			// Read commit message from file
 			if len(args) < 4 {
-				panic("Flag 'f' requires a value.")
+				utils.Exit("Flag 'f' requires a value.")
 			}
 
 			message, err := ioutil.ReadFile(args[3])
 			branch, err := ioutil.ReadFile(".ssc/branch")
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 			tree := core.CreateTree()
@@ -232,7 +232,7 @@ func main() {
 	case "log":
 
 		if len(args) < 3 {
-			panic("Command 'log' requires a flag and an argument.")
+			utils.Exit("Command 'log' requires a flag and an argument.")
 		}
 
 		switch args[2] {
@@ -240,27 +240,27 @@ func main() {
 		case "-n", "--number":
 
 			if args[3] == "" {
-				panic("Flag 'n' or 'number' requires a value.")
+				utils.Exit("Flag 'n' or 'number' requires a value.")
 			}
 
 			arg, err := strconv.ParseInt(args[3], 10, 64)
 			core.Log(int(arg), false)
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 		case "-r", "--reverse":
 			// Log n number of commits from first to last
 			if args[3] == "" {
-				panic("Flag 'r' or 'reverse' requires a value.")
+				utils.Exit("Flag 'r' or 'reverse' requires a value.")
 			}
 
 			arg, err := strconv.ParseInt(args[3], 10, 64)
 			core.Log(int(arg), true)
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 		case "-m", "--max":
@@ -281,7 +281,7 @@ func main() {
 	case "hash-object":
 
 		if len(args) < 3 {
-			panic("Command 'hash-object' requires a flag and an argument.")
+			utils.Exit("Command 'hash-object' requires a flag and an argument.")
 		}
 
 		switch args[2] {
@@ -319,7 +319,7 @@ func main() {
 	case "branch":
 
 		if len(args) < 3 {
-			panic("Command 'branch' requires a flag and an argument.")
+			utils.Exit("Command 'branch' requires a flag and an argument.")
 		}
 
 		switch args[2] {

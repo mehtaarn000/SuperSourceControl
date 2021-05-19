@@ -21,13 +21,13 @@ func Log(commits int, reverse bool) {
 	commitlog = commitlog[:len(commitlog)-1]
 
 	if commits > len(commitlog) {
-		panic("Number of requested commits is too large")
+		utils.Exit("Number of requested commits is too large")
 	}
 
 	//Get number of commits passed to function
 	requested_commits := commitlog[len(utils.DeleteEmpty(commitlog))-commits:]
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	//If the user doesn't specify the reverse option
@@ -51,7 +51,7 @@ func Log(commits int, reverse bool) {
 	}
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }
 
@@ -73,6 +73,6 @@ func MaxLog(reverse bool) {
 	Log(numofcommits, false)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }
