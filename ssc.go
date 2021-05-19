@@ -20,7 +20,7 @@ func main() {
 	args := os.Args
 
 	// Metadata
-	__version__ := "2.0"
+	__version__ := "2.1"
 	__author__ := "mehtaarn000"
 	__github__ := "https://github.com/mehtaarn000/SuperSourceControl"
 
