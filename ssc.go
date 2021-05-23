@@ -353,7 +353,7 @@ func main() {
 		}
 
 	case "update":
-		core.BashUpdate()
+		core.Update()
 
 	case "help", "-h", "--help":
 		print(core.Usage)
