@@ -352,6 +352,9 @@ func main() {
 			println(core.BranchUsage)
 		}
 
+	case "update":
+		core.BashUpdate()
+
 	case "help", "-h", "--help":
 		print(core.Usage)
 
