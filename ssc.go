@@ -356,7 +356,7 @@ func main() {
 		core.Update()
 
 	case "help", "-h", "--help":
-		print(core.Usage)
+		println(core.Usage)
 
 	case "-v", "--version":
 		println(__version__)
