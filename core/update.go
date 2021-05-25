@@ -1,3 +1,8 @@
+/* Copyright © 2021
+Author : mehtaarn000
+Email : arnavm834@gmail.com
+*/
+
 package core
 
 import (
@@ -33,5 +38,8 @@ func Update() {
 		if err != nil {
 			utils.Exit(err)
 		}
+	
+	default:
+		utils.Exit("Sorry. Updates on your OS are not supported as of right now.")
 	}
 }
