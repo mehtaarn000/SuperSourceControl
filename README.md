@@ -1,5 +1,5 @@
 # SuperSourceControl
-A local version control system written in Go. I built this as a way to introduce myself to Golang.
+A local version control system written in Go. I built this as a way to introduce myself to Golang. (v2.1)
 
 ## Installation
 ```
