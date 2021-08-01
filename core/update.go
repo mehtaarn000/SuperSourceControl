@@ -40,6 +40,6 @@ func Update() {
 		}
 	
 	default:
-		utils.Exit("Sorry. Updates on your OS are not supported as of right now.")
+		utils.Exit("Updates are only supported on Unix based systems.")
 	}
 }
