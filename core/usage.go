@@ -4,6 +4,7 @@ const Usage = `Usage of ssc:
 Standard:
 	commit [flags] (argument) [options] Create a commit
 	log [flags] (argument) List recent commits
+	init Initilize a repository
 
 Inner:
 	cat-file [flags] (argument) Get information about ssc objects
