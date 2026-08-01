@@ -28,3 +28,10 @@ const LogUsage = `Usage of ssc log:
 Flags:
 	-n, --number [number of commits (int)] Print x many commits with the most recent being on the top
 	-r, --reverse [number of commits (int)] Print x many commits with the most recent being on the bottom`
+
+const HashObjectUsage = `Usage of ssc hash-object:
+Flags:
+	-s, --stdin [string to hash] Print hash of stdin
+	-ws, --write-stdin [string to hash and write to db] Write hash of stdin to ssc database
+	-f, --file [filename] Print hash of file
+	-wf, --write-file [filename] Write hash of file to ssc database` 

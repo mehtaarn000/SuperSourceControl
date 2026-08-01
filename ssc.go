@@ -124,8 +124,39 @@ func main() {
 		default:
 			println(core.LogUsage)
 		}
+	
+	case "hash-object":
+		if len(args) < 4 {
+			panic("Minimum of 4 arguments required for ssc hash-object.")
+		}
 
+		switch args[2] {
+		case "-s", "--stdin":
+			core.PrintStdinHash(string(args[3]))
+		
+		case "-ws", "--write-stdin":
+			if args[4] == "--quiet" {
+				core.WriteStdinHash(string(args[3]), true)
+			} else {
+				core.WriteStdinHash(string(args[3]), false)
+			}
+		
+		case "-f", "--file":
+			core.PrintFileHash(string(args[3]))
 
+		case "-wf", "--write-file":
+			if args[4] == "--quiet" {
+				core.WriteFileHash(string(args[3]), true)
+			} else {
+				core.WriteFileHash(string(args[3]), false)
+			}
+		
+		case "-h", "--help":
+			println(core.HashObjectUsage)
+		
+		default:
+			println(core.HashObjectUsage)
+		}
 	
 	case "help", "-h", "--help":
 		print(core.Usage)
