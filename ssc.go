@@ -99,18 +99,33 @@ func main() {
 		}
 
 	case "log":
-		// Prints previous commits
-		if len(args) < 3 {
-			panic("'log' command requires an int argument")
+
+		if len(args) < 4 {
+			panic("Minimum of 4 arguments required for ssc log.")
 		}
 
-		arg, err := strconv.ParseInt(args[2], 10, 64)
+		switch args[2] {
+		case "-n", "--number":
+			arg, err := strconv.ParseInt(args[3], 10, 64)
+			core.Log(int(arg), false)
 
-		if err != nil {
-			panic(err)
+			if err != nil {
+				panic(err)
+			}
+		
+		case "-r", "--reverse":
+			arg, err := strconv.ParseInt(args[3], 10, 64)
+			core.Log(int(arg), true)
+
+			if err != nil {
+				panic(err)
+			}
+		
+		default:
+			println(core.LogUsage)
 		}
 
-		core.Log(int(arg))
+
 	
 	case "help", "-h", "--help":
 		print(core.Usage)
