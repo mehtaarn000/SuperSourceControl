@@ -16,6 +16,7 @@ func main() {
 		panic("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
 
+	// If the user runs 'ssc'
 	if len(args) < 2 {
 		print(core.Usage)
 		os.Exit(0)
@@ -57,6 +58,7 @@ func main() {
 		
 	
 		case "-e", "--editor":
+			//TODO add default editor
 			if len(args) < 4 {
 				panic("Flag 'e' or 'editor' requires a value.")
 			}
@@ -76,6 +78,7 @@ func main() {
 			core.CreateCommit(commit)
 			
 		case "-f", "--file":
+			// Read commit message from file
 			if len(args) < 4  {
 				panic("Flag 'f' requires a value.")
 			}
@@ -96,6 +99,7 @@ func main() {
 		}
 
 	case "log":
+		// Prints previous commits
 		if len(args) < 3 {
 			panic("'log' command requires an int argument")
 		}
