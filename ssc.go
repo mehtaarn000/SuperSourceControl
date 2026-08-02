@@ -33,6 +33,11 @@ func main() {
 
 	switch args[1] {
 	case "cat-file":
+
+		if len(args) < 4 {
+			panic("1 flag and 1 argument is required for cat-file")
+		}
+
 		switch args[2] {
 		case "-s", "--size":
 			core.PrintSize(args[3])
@@ -47,7 +52,13 @@ func main() {
 		default:
 			println(core.CatFileUsage)
 		}
-
+	
+	case "revert":
+		switch args[2] {
+		case "-n":
+			core.RevertTo(string(args[3]))
+		}
+		
 	case "commit":
 		switch args[2] {
 		case "-m", "--message":
