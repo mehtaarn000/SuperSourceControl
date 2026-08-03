@@ -271,11 +271,21 @@ func main() {
 		switch args[2] {
 		// Create a new branch
 		case "-n", "--new":
-			core.CreateBranch(string(args[3]))	
+			core.CreateBranch(args[3])	
 			
 		case "-ns", "--new-switch":
-			core.CreateBranch(string(args[3]))
-			core.SwitchBranch(string(args[3]))
+			core.CreateBranch(args[3])
+			core.SwitchBranch(args[3])
+
+		case "-s", "--switch":
+			core.SwitchBranch(args[3])
+		
+		case "-d", "-D", "--delete":
+			if len(args) == 5 && args[4] == "--force" {
+				core.DeleteBranch(args[3], true)
+			} else {
+				core.DeleteBranch(args[3], false)
+			}
 
 		case "-h", "--help":
 			println(core.BranchUsage)
