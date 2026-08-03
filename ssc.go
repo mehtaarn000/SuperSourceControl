@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"io/ioutil"
 	"os"
-	"ssc/core"
-	"time"
 	"os/exec"
+	"ssc/core"
 	"strconv"
-	"bufio"
+	"time"
 )
 
 func main() {
@@ -47,12 +47,12 @@ func main() {
 		default:
 			println(core.CatFileUsage)
 		}
-	
+
 	case "revert":
 		switch args[2] {
 		case "-n":
 			core.RevertTo(string(args[3]))
-		
+
 		case "-h", "--help":
 			println(core.RevertUsage)
 
@@ -63,7 +63,7 @@ func main() {
 	case "commit":
 		switch args[2] {
 		case "-m", "--message":
-			if len(args) < 4  {
+			if len(args) < 4 {
 				panic("Flag 'm' or 'message' requires a value.")
 			}
 
@@ -74,9 +74,9 @@ func main() {
 				panic(err)
 			}
 
-			commit := core.Commit{Tree:tree, Date:time.Now().Format(time.RFC3339), Message:args[3], Branch:string(file)}
+			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: args[3], Branch: string(file)}
 			core.CreateCommit(commit)
-		
+
 		case "-p", "--prompt":
 			scanner := bufio.NewScanner(os.Stdin)
 
@@ -84,7 +84,7 @@ func main() {
 			scanner.Scan()
 
 			input := scanner.Text()
-			
+
 			tree := core.CreateTree()
 			file, err := ioutil.ReadFile(".ssc/branch")
 
@@ -92,7 +92,7 @@ func main() {
 				panic(err)
 			}
 
-			commit := core.Commit{Tree:tree, Date:time.Now().Format(time.RFC3339), Message:input, Branch:string(file)}
+			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: input, Branch: string(file)}
 			core.CreateCommit(commit)
 
 		case "-e", "--editor":
@@ -106,21 +106,21 @@ func main() {
 
 			branch, err := ioutil.ReadFile(".ssc/branch")
 			message, err := ioutil.ReadFile(".ssc/tmp/message.txt")
-			
+
 			if err != nil {
 				panic(err)
 			}
 
 			tree := core.CreateTree()
-			commit := core.Commit{Tree:tree, Date:time.Now().Format(time.RFC3339), Message:string(message), Branch:string(branch)}
+			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
 			core.CreateCommit(commit)
-			
+
 		case "-f", "--file":
 			// Read commit message from file
-			if len(args) < 4  {
+			if len(args) < 4 {
 				panic("Flag 'f' requires a value.")
 			}
-			
+
 			message, err := ioutil.ReadFile(args[3])
 			branch, err := ioutil.ReadFile(".ssc/branch")
 
@@ -129,12 +129,12 @@ func main() {
 			}
 
 			tree := core.CreateTree()
-			commit := core.Commit{Tree:tree, Date:time.Now().Format(time.RFC3339), Message:string(message), Branch:string(branch)}
+			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
 			core.CreateCommit(commit)
 
 		case "-h", "--help":
 			println(core.CommitUsage)
-		
+
 		default:
 			println(core.CommitUsage)
 		}
@@ -153,7 +153,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-		
+
 		case "-r", "--reverse":
 
 			if args[3] == "" {
@@ -166,10 +166,10 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-		
+
 		case "-m", "--max":
 			core.MaxLog(false)
-		
+
 		case "-mr", "--max-reverse":
 			core.MaxLog(true)
 
@@ -179,7 +179,7 @@ func main() {
 		default:
 			println(core.LogUsage)
 		}
-	
+
 	case "hash-object":
 		if len(args) < 4 && args[2] != "-h" && args[2] != "--help" {
 			panic("Minimum of 4 arguments required for ssc hash-object.")
@@ -188,14 +188,14 @@ func main() {
 		switch args[2] {
 		case "-s", "--stdin":
 			core.PrintStdinHash(string(args[3]))
-		
+
 		case "-ws", "--write-stdin":
 			if len(args) == 5 && args[4] == "--quiet" {
 				core.WriteStdinHash(string(args[3]), true)
 			} else {
 				core.WriteStdinHash(string(args[3]), false)
 			}
-		
+
 		case "-f", "--file":
 			core.PrintFileHash(string(args[3]))
 
@@ -205,14 +205,14 @@ func main() {
 			} else {
 				core.WriteFileHash(string(args[3]), false)
 			}
-		
+
 		case "-h", "--help":
 			println(core.HashObjectUsage)
-		
+
 		default:
 			println(core.HashObjectUsage)
 		}
-	
+
 	case "help", "-h", "--help":
 		print(core.Usage)
 
