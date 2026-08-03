@@ -38,8 +38,8 @@ func main() {
 	switch args[1] {
 	case "cat-file":
 
-		if args[2] == "" {
-			panic("Command 'cat-file' requires a flag and argument")
+		if len(args) < 3 {
+			panic("Command 'cat-file' requires a flag and an argument.")
 		}
 
 		// Print function's output and exits
@@ -59,10 +59,10 @@ func main() {
 		}
 
 	case "revert":
-
 		// Revert CWD to a previous commit
-		if args[2] == "" {
-			panic("Command 'revert' requires a flag and argument")
+
+		if len(args) < 3 {
+			panic("Command 'revert' requires a flag and an argument.")
 		}
 		
 		switch args[2] {
@@ -78,8 +78,8 @@ func main() {
 
 	case "commit":
 
-		if args[2] == "" {
-			panic("Command 'commit' requires a flag and argument")
+		if len(args) < 3 {
+			panic("Command 'commit' requires a flag and an argument.")
 		}
 
 		switch args[2] {
@@ -167,8 +167,8 @@ func main() {
 
 	case "log":
 
-		if args[2] == "" {
-			panic("Command 'log' requires a flag and argument")
+		if len(args) < 3 {
+			panic("Command 'log' requires a flag and an argument.")
 		}
 
 		switch args[2] {
@@ -215,8 +215,9 @@ func main() {
 		}
 
 	case "hash-object":
-		if args[2] == "" {
-			panic("Command 'log' requires a flag and argument")
+
+		if len(args) < 3 {
+			panic("Command 'hash-object' requires a flag and an argument.")
 		}
 
 		switch args[2] {
