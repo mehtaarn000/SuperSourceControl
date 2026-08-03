@@ -19,6 +19,7 @@ func PrintContent(hash string) {
 	println(content)
 }
 
+// Utility function to get the content of an object
 func getContent(hash string) string {
 	zlibutils.DecompressFile(hash)
 	content, err := ioutil.ReadFile(".ssc/tmp/" + hash)
@@ -32,8 +33,12 @@ func getContent(hash string) string {
 	return (string(content))
 }
 
-// PrintType prints an objects type
+// PrintType prints an objects type (Broken as of now)
 func PrintType(hash string) {
+
+	// If the hash is in commitlog, then it is a commit
+	// If the hash is in the trees file, then it is a tree
+	// Else it is a blob
 	bytedata, err := ioutil.ReadFile(".ssc/commitlog")
 
 	if err != nil {
@@ -71,7 +76,7 @@ func PrintType(hash string) {
 	//panic("Object with hash '" + hash + "' does not exist.")
 }
 
-// PrintSize prints an decoded objects size (basically the raw file itself)
+// PrintSize prints an decoded objects size (basically the file itself)
 func PrintSize(hash string) {
 	zlibutils.DecompressFile(hash)
 	file, err := os.Stat(".ssc/tmp/" + hash)
@@ -95,6 +100,7 @@ func PrintZlibSize(hash string) {
 	println(file.Size())
 }
 
+// Utility function to check if a hash is in the log
 func existInArray(hash string, log []string) bool {
 	sort.Strings(log)
 	i := sort.SearchStrings(log, hash)

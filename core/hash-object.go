@@ -12,6 +12,7 @@ import (
 	"ssc/zlibutils"
 )
 
+// Utility function to turn a file/stdin into a blob and return the blob's hash
 func hashObject(s string) string {
 	stringtohash := "blob " + string(rune(len(s))) + s
 
@@ -50,6 +51,7 @@ func PrintFileHash(filename string) {
 	}
 }
 
+// WriteFileHash takes a filename, turns the file into a blob object, hashes it, and writes it to the ssc database
 func WriteFileHash(filename string, quiet bool) {
 	bytesfilecontent, err := ioutil.ReadFile(filename)
 	filecontent := string(bytesfilecontent)
