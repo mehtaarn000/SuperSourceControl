@@ -12,9 +12,9 @@ import (
 func CompressFile(fileToHash map[string]string) {
 	for file, hash := range fileToHash {
 		rawfile, err := os.Open(file)
-	
+
 		if err != nil {
-				panic(err)
+			panic(err)
 		}
 		defer rawfile.Close()
 
@@ -28,7 +28,7 @@ func CompressFile(fileToHash map[string]string) {
 		_, err = buffer.Read(rawbytes)
 
 		if err != nil {
-				panic(err)
+			panic(err)
 		}
 
 		var buf bytes.Buffer
@@ -36,6 +36,6 @@ func CompressFile(fileToHash map[string]string) {
 		writer.Write(rawbytes)
 		writer.Close()
 
-		ioutil.WriteFile(".ssc/objects/" + hash, buf.Bytes(), info.Mode())
+		ioutil.WriteFile(".ssc/objects/"+hash, buf.Bytes(), info.Mode())
 	}
 }
