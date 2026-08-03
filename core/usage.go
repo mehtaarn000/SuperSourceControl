@@ -42,5 +42,5 @@ Flags:
 
 const RevertUsage = `Usage of ssc revert:
 Flags:
-	-n [hash] Revert to hash
+	-n [commit hash] Revert to hash
 	-h, --help Print this message`
