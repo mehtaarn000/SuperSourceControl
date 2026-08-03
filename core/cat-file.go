@@ -1,11 +1,11 @@
 package core
 
 import (
-	"ssc/zlibutils"
 	"io/ioutil"
 	"os"
-	"strings"
 	"sort"
+	"ssc/zlibutils"
+	"strings"
 )
 
 // PrintContent prints an objects content as a string
@@ -21,10 +21,10 @@ func getContent(hash string) string {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	os.Remove(".ssc/tmp/" + hash)
 
-	return (string(content))	
+	return (string(content))
 }
 
 // PrintType prints an objects type
@@ -44,7 +44,7 @@ func PrintType(hash string) {
 	}
 
 	blobbytes, err := ioutil.ReadFile(".ssc/blobs")
-	
+
 	blobs := strings.Split(string(blobbytes), "\n")
 	check2 := existInArray(hash, blobs)
 
@@ -53,7 +53,7 @@ func PrintType(hash string) {
 		os.Exit(0)
 	}
 
-	treebytes, err := ioutil.ReadFile(".ssc/trees") 
+	treebytes, err := ioutil.ReadFile(".ssc/trees")
 
 	trees := strings.Split(string(treebytes), "\n")
 	check3 := existInArray(hash, trees)
@@ -82,7 +82,7 @@ func PrintSize(hash string) {
 // PrintZlibSize prints a zlib encoded objects size
 func PrintZlibSize(hash string) {
 	file, err := os.Stat(".ssc/objects/" + hash)
-	
+
 	if err != nil {
 		panic(err)
 	}
