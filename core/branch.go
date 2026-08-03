@@ -96,6 +96,7 @@ func DeleteBranch(name string, force bool) {
 	if !force {
 		scanner := bufio.NewScanner(os.Stdin)
 		for {
+			print("Are you sure you want to delete branch: " + name + " [y/n]?")
 			scanner.Scan()
 
 			confirm = scanner.Text()
