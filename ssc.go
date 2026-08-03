@@ -262,6 +262,19 @@ func main() {
 			println(core.HashObjectUsage)
 		}
 
+	case "branch":
+
+		if len(args) < 3 {
+			panic("Command 'branch' requires a flag and an argument.")
+		}
+
+		switch args[2] {
+		// Create a new branch
+		case "-n", "--new":
+			core.CreateBranch(string(args[3]))		
+		}
+		
+
 	case "help", "-h", "--help":
 		print(core.Usage)
 	

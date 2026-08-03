@@ -22,7 +22,6 @@ func Init() {
 	|-- objects/
 	|-- tmp/
 	|-- branch (default = master)
-	|-- commitlog
 	|-- trees	
 	*/
 
