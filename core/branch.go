@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io/ioutil"
 	"os"
+	"strings"
 	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
@@ -14,34 +15,62 @@ func CreateBranch(name string) {
 		}
 	}
 
-	newmatcher, err := pcre.Compile("^(?!/|.*([/.]\\.|//|@\\{|\\\\))[^\040\177 ~^:?*\\[]+(?<!\\.lock|[/.])$", 0)
+	currentbranch, err := ioutil.ReadFile(".ssc/branch")
+	othercommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
+	array := strings.Split(string(othercommitlog), "\n")
+	head := array[0]
+
+	if head == "" || head == "\n" {
+		panic("At least 1 commit must be made on the default branch before new branches can be created.")
+	}
+
+	newmatcher, rerr := pcre.Compile("^(?!/|.*([/.]\\.|//|@\\{|\\\\))[^\040\177 ~^:?*\\[]+(?<!\\.lock|[/.])$", 0)
 	match := newmatcher.Matcher([]byte(name), 0).MatchString(name, 0)
 
 	if !match {
 		panic("Invalid branch name: '" + name + "'")
 	}
 
-	mkerr := os.Mkdir(".ssc/branches/" + name, 0777)
-	_, mkerr = os.Create(".ssc/branches/" + name + "/commitlog")
+	err = os.Mkdir(".ssc/branches/" + name, 0777)
+	f, err := os.Create(".ssc/branches/" + name + "/commitlog")
+	defer f.Close()
 
-	if err != nil {
+	f.WriteString(head + "\n")
+
+	if rerr != nil {
 		panic(err)
 	} 
 
-	if mkerr != nil {
-		panic(mkerr)
+	if err != nil {
+		panic(err)
 	}
 }
 
 func SwitchBranch(name string) {
+	// ALL UNCOMMITTED CHANGES WILL BE LOST
+	// TODO Add feature that stores uncommitted changes when switching branches
 	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
 		if os.IsNotExist(err) {
 			panic("Branch '" + name + "' does not exist.")
 		}
 	}
 
+	currentbranch, err := ioutil.ReadFile(".ssc/branch")
+
 	writer, err := os.Create(".ssc/branch")
 	writer.WriteString(name)
+
+	othercommitlog, err := ioutil.ReadFile(".ssc/branches/" + name + "/commitlog")
+	array1 := strings.Split(string(othercommitlog), "\n")
+	head1 := array1[0]
+
+	thiscommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
+	array2 := strings.Split(string(thiscommitlog), "\n")
+	head2 := array2[0]
+
+	if head1 != head2 {
+		RevertTo(head1)
+	}
 
 	if err != nil {
 		panic(err)

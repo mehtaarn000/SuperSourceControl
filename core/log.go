@@ -14,7 +14,9 @@ import (
 // Log lists the commits from the commitlog
 func Log(commits int, reverse bool) {
 	// Get commits
-	bytescommitlog, err := ioutil.ReadFile(".ssc/commitlog")
+	currentbranch, err := ioutil.ReadFile(".ssc/branch")
+
+	bytescommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
 	commitlog := strings.Split(string(bytescommitlog), "\n")
 	commitlog = commitlog[:len(commitlog)-1]
 
@@ -22,23 +24,23 @@ func Log(commits int, reverse bool) {
 		panic("Number of requested commits is too large")
 	}
 
-	// Get number of commits passed to function
+	//Get number of commits passed to function
 	requested_commits := commitlog[len(utils.DeleteEmpty(commitlog))-commits:]
 	if err != nil {
 		panic(err)
 	}
 
-	// If the user doesn't specify the reverse option
+	//If the user doesn't specify the reverse option
 	if !reverse {
 		requested_commits = utils.ReverseArray(requested_commits)
 	}
 
 	for _, commit := range requested_commits {
-		// Get content of each commit
+		//Get content of each commit
 		content := getContent(commit)
 		split_content := strings.Split(content, "\n")
 
-		// Slice the string to get the date and message
+		//Slice the string to get the date and message
 		date := split_content[1][5:]
 		message := split_content[4]
 
@@ -55,15 +57,20 @@ func Log(commits int, reverse bool) {
 
 // MaxLog gets all the commits and logs them
 func MaxLog(reverse bool) {
-	bytescommitlog, err := ioutil.ReadFile(".ssc/commitlog")
-	numofcommits := len(strings.Split(string(bytescommitlog), "\n"))
+
+	currentbranch, err := ioutil.ReadFile(".ssc/branch")
+
+	bytescommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
+	commits := strings.Split(string(bytescommitlog), "\n")
+	commits = utils.DeleteEmpty(commits)
+	numofcommits := len(commits)
 
 	if reverse {
-		Log(numofcommits-1, true)
+		Log(numofcommits, true)
 		return
 	}
 
-	Log(numofcommits-1, false)
+	Log(numofcommits, false)
 
 	if err != nil {
 		panic(err)
