@@ -5,7 +5,9 @@ Email : arnavm834@gmail.com
 
 package core
 
-import "os"
+import (
+	"os"
+)
 
 func Init() {
 	// If .ssc repo already exists
@@ -16,9 +18,11 @@ func Init() {
 		}
 	}
 
-	/*Repository file structure:
+	/* Initial repository file structure:
 	.ssc/
 	|-- branches/
+	    |-- master/
+		    |-- commitlog
 	|-- objects/
 	|-- tmp/
 	|-- branch (default = master)
@@ -26,7 +30,7 @@ func Init() {
 	*/
 
 	// Create dirs
-	err := os.MkdirAll(".ssc/branches", 0777)
+	err := os.MkdirAll(".ssc/branches/master", 0777)
 	err = os.MkdirAll(".ssc/objects", 0777)
 	err = os.MkdirAll(".ssc/tmp", 0777)
 
@@ -34,7 +38,7 @@ func Init() {
 	f, err := os.Create(".ssc/branch")
 	f.WriteString("master")
 
-	f, err = os.Create(".ssc/commitlog")
+	f, err = os.Create(".ssc/branches/master/commitlog")
 	f, err = os.Create(".ssc/trees")
 
 	if err != nil {

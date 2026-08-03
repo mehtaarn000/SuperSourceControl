@@ -46,7 +46,7 @@ func DeleteEmpty(s []string) []string {
 
 // Create creates files and directories recursively (and returns a write object)
 func Create(p string) (*os.File, error) {
-	if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
+	if err := os.MkdirAll(filepath.Dir(p), 0777); err != nil {
 		return nil, err
 	}
 	return os.Create(p)

@@ -50,3 +50,9 @@ const RevertUsage = `Usage of ssc revert:
 Flags:
 	-n [commit hash] Revert to hash
 	-h, --help Print this message`
+
+const BranchUsage = `Usage of ssc branch:
+Flags:
+	-n, --new [branch name] Create branch with argument as name
+	-ns, --new-switch [branch name] Create and switch to branch with argument as name
+	-h, --help Print this message`
