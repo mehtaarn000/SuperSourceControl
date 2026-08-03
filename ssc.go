@@ -33,6 +33,11 @@ func main() {
 
 	switch args[1] {
 	case "cat-file":
+
+		if args[2] == "" {
+			panic("Command 'cat-file' requires a flag and argument")
+		}
+
 		switch args[2] {
 		case "-s", "--size":
 			core.PrintSize(args[3])
@@ -49,6 +54,11 @@ func main() {
 		}
 
 	case "revert":
+
+		if args[2] == "" {
+			panic("Command 'log' requires a flag and argument")
+		}
+
 		switch args[2] {
 		case "-n":
 			core.RevertTo(string(args[3]))
@@ -61,6 +71,11 @@ func main() {
 		}
 
 	case "commit":
+
+		if args[2] == "" {
+			panic("Command 'commit' requires a flag and argument")
+		}
+
 		switch args[2] {
 		case "-m", "--message":
 			if len(args) < 4 {
@@ -140,6 +155,11 @@ func main() {
 		}
 
 	case "log":
+
+		if args[2] == "" {
+			panic("Command 'log' requires a flag and argument")
+		}
+
 		switch args[2] {
 		case "-n", "--number":
 
@@ -181,8 +201,8 @@ func main() {
 		}
 
 	case "hash-object":
-		if len(args) < 4 && args[2] != "-h" && args[2] != "--help" {
-			panic("Minimum of 4 arguments required for ssc hash-object.")
+		if args[2] == "" {
+			panic("Command 'log' requires a flag and argument")
 		}
 
 		switch args[2] {
