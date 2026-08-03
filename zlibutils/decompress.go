@@ -1,3 +1,8 @@
+/* Copyright © 2021
+Author : mehtaarn000
+Email : arnavm834@gmail.com
+*/
+
 package zlibutils
 
 import (
