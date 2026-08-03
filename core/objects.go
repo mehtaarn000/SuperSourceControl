@@ -12,41 +12,9 @@ import (
 	"os"
 	"path/filepath"
 	"ssc/zlibutils"
+	"ssc/utils"
 	"strings"
 )
-
-// Utility function to get all file names in cwd
-func get_files() []string {
-	var files []string
-
-	err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-
-		if strings.Contains(path, ".ssc") {
-			return nil
-		}
-
-		files = append(files, path)
-		return nil
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	return files
-}
-
-// Utility to check if file exists in cwd
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
 
 // CreateCommit creates a commit, compresses it, and writes it to a file.
 func CreateCommit(c Commit) {
@@ -105,7 +73,7 @@ func CreateCommit(c Commit) {
 // CreateTree creates a tree object
 func CreateTree() string {
 	// Get all file names in directory
-	files := get_files()
+	files := utils.GetFiles()
 
 	// Create blobs using all file names
 	rawtree := createBlobs(files)
@@ -174,7 +142,7 @@ func createBlobs(filenames []string) string {
 
 		// If the file doesn't exist, create it
 		// Multiple files can point to the same object
-		if !fileExists(hashfile) {
+		if !utils.FileExists(hashfile) {
 			ioutil.WriteFile(hashfile, raw, 0644)
 			zlibfiles[hashfile] = hash
 		}
