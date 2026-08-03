@@ -137,13 +137,13 @@ func main() {
 		}
 
 	case "log":
-
-		if len(args) < 4 {
-			panic("Minimum of 4 arguments required for ssc log.")
-		}
-
 		switch args[2] {
 		case "-n", "--number":
+
+			if args[3] == "" {
+				panic("Flag 'n' or 'number' requires a value.")
+			}
+
 			arg, err := strconv.ParseInt(args[3], 10, 64)
 			core.Log(int(arg), false)
 
@@ -152,6 +152,11 @@ func main() {
 			}
 		
 		case "-r", "--reverse":
+
+			if args[3] == "" {
+				panic("Flag 'r' or 'reverse' requires a value.")
+			}
+
 			arg, err := strconv.ParseInt(args[3], 10, 64)
 			core.Log(int(arg), true)
 
@@ -159,6 +164,12 @@ func main() {
 				panic(err)
 			}
 		
+		case "-m", "--max":
+			core.MaxLog(false)
+		
+		case "-mr", "--max-reverse":
+			core.MaxLog(true)
+
 		default:
 			println(core.LogUsage)
 		}
