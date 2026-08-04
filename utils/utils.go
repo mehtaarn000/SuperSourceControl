@@ -10,16 +10,51 @@ package utils
 
 import (
 	"sort"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
+
+func Find(a []string, x string) int {
+    for i, n := range a {
+        if x == n {
+            return i
+        }
+    }
+    return len(a)
+}
+
+func Intersection(s1, s2 []string) (inter []string) {
+    hash := make(map[string]bool)
+    for _, e := range s1 {
+        hash[e] = true
+    }
+    for _, e := range s2 {
+        // If elements present in the hashmap then append intersection list.
+        if !hash[e] {
+            inter = append(inter, e)
+        }
+    }
+    //Remove dups from slice.
+    inter = removeDups(inter)
+    return
+}
+
+//Remove dups from slice.
+func removeDups(elements []string)(nodups []string) {
+    encountered := make(map[string]bool)
+    for _, element := range elements {
+        if !encountered[element] {
+            nodups = append(nodups, element)
+            encountered[element] = true
+        }
+    }
+    return
+}
+
 // ExistInArray is used to check if a hash is in the log
-func ExistInArray(hash string, log []string) bool {
-	sort.Strings(log)
-	i := sort.SearchStrings(log, hash)
-	if i < len(log) && log[i] == hash {
+func ExistInArray(element string, array []string) bool {
+	sort.Strings(array)
+	i := sort.SearchStrings(array, element)
+	if i < len(element) && array[i] == element {
 		return true
 	}
 	return false
@@ -44,43 +79,4 @@ func DeleteEmpty(s []string) []string {
 	return r
 }
 
-// Create creates files and directories recursively (and returns a write object)
-func Create(p string) (*os.File, error) {
-	if err := os.MkdirAll(filepath.Dir(p), 0777); err != nil {
-		return nil, err
-	}
-	return os.Create(p)
-}
 
-// GetFiles is used to get all file names (not full paths) in cwd
-func GetFiles() []string {
-	var files []string
-
-	err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-
-		if strings.Contains(path, ".ssc") {
-			return nil
-		}
-
-		files = append(files, path)
-		return nil
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	return files
-}
-
-// FileExists it used to check if file exists in cwd
-func FileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}

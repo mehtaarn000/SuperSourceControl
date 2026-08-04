@@ -7,6 +7,7 @@ package core
 
 import (
 	"ssc/utils"
+	"os"
 	"strings"
 )
 
@@ -21,14 +22,47 @@ func RevertTo(hash string) {
 	tree := getContent(get_tree)
 	arr := strings.Split(tree, "\n")
 
-	for _, content := range arr {
-		// filenameToHash[0] = filename
-		// filenameToHash[1] = filename
-		filenameToHash := strings.Split(content, " ")
+	// cwdfiles = files in current working directory (only names not full paths)
+	cwdfiles := utils.GetFiles()
+	filesintree := []string{}
+	hashes := []string{}
 
-		// Get content of each object and write it to a new file in the CWD
-		filecontent := getContent(filenameToHash[1])
-		writer, err := utils.Create(string(filenameToHash[0]))
+	// filesintree and hashes arrays match indexes for files to hashes
+	for _, filehash := range arr {
+		items := strings.Split(filehash, " ")
+		filesintree = append(filesintree, items[0])
+		hashes = append(hashes, items[1])
+	} 
+	
+	// Get all files not in currentworking directory
+	notincwd := utils.Intersection(filesintree, cwdfiles)
+
+	for _, file := range notincwd {
+		// Remove the file, else create it
+		err := os.Remove(file)
+
+		if err != nil {
+			/*Index in filesintree
+			Get object hash using the index from hashes array
+			Create and write the data to the file*/
+			index := utils.Find(filesintree, file)
+			object := hashes[index]
+
+			filecontent := getContent(object)
+			writer, err := utils.Create(file)
+
+			writer.WriteString(filecontent)
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+	
+	// Create needed files
+	for i, hash := range hashes {
+		filecontent := getContent(hash)
+		writer, err := utils.Create(string(filesintree[i]))
 
 		writer.WriteString(filecontent)
 
