@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func Init() {
+func Init(branch string) {
 	// If .ssc repo already exists
 	if _, err := os.Stat(".ssc"); err != nil {
 		if os.IsExist(err) {
@@ -30,7 +30,7 @@ func Init() {
 	*/
 
 	// Create dirs
-	err := os.MkdirAll(".ssc/branches/master", 0777)
+	err := os.MkdirAll(".ssc/branches/" + branch, 0777)
 	err = os.MkdirAll(".ssc/objects", 0777)
 	err = os.MkdirAll(".ssc/tmp", 0777)
 
@@ -38,7 +38,7 @@ func Init() {
 	f, err := os.Create(".ssc/branch")
 	f.WriteString("master")
 
-	f, err = os.Create(".ssc/branches/master/commitlog")
+	f, err = os.Create(".ssc/branches/" + branch + "/commitlog")
 	f, err = os.Create(".ssc/trees")
 
 	if err != nil {
