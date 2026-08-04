@@ -5,17 +5,20 @@ import (
 	"io/ioutil"
 	"os"
 	"github.com/tidwall/sjson"
+	"bufio"
 )
 
 // GetSetting gets the passed setting from the .sscconfig.json file in home directory
-func GetSetting(setting string) string {
+func GetSetting(setting string) {
 	// Get .sscconfig.json file from home directory
 	homedir, err := os.UserHomeDir()
 	get_settings, err := ioutil.ReadFile(homedir + "/.sscconfig.json")
 
+	data := []byte(get_settings)
+
 	// Unmarshal/parse data and store it in objmap
-	var objmap map[string]string
-	if err := json.Unmarshal(get_settings, &objmap); err != nil {
+	var objmap map[string]interface{}
+	if err := json.Unmarshal(data, &objmap); err != nil {
 		panic(err)
 	}
 
@@ -31,7 +34,7 @@ func GetSetting(setting string) string {
 		panic(err)
 	}
 
-	return value
+	println(value.(string))
 }
 
 // ChangeSetting changes a setting in the .sscconfig.json file in home directory
@@ -48,8 +51,51 @@ func ChangeSetting(setting string, new_setting string) {
 	}
 
 	// Write new settings back to config file
-	os.Create(homedir + "/.sscconfig.json")
-	err = ioutil.WriteFile(homedir + "/.sscconfig.json", []byte(newsettings), os.FileMode(0777))
+	writer, err := os.Create(homedir + "/.sscconfig.json")
+	writer.WriteString(newsettings)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func DefaultSettings(force bool) {
+	// Get .sscconfig.json file from home directory
+	homedir, err := os.UserHomeDir()
+
+	defaultSettings := `{
+	"defaultBranch": "master",
+	"aliases": {},
+	"commitMessagePrompt": "Input a commit message: ",
+	"forceBranchDeletion": "false"
+}`
+	
+	if !force {
+		scanner := bufio.NewScanner(os.Stdin)
+		for {
+			print("Are you sure you want to restore all settings to default [y/n]?")
+			scanner.Scan()
+
+			confirm = scanner.Text()
+			if confirm == "Y" || confirm == "N" || confirm == "y" || confirm == "n" {
+				break
+			}
+		}
+		
+		if confirm == "Y" || confirm == "y" {
+			writer, err := os.Create(homedir + "/.sscconfig.json")
+			writer.WriteString(defaultSettings)
+			if err != nil {
+				panic(err)
+			}
+
+		} else {
+			return
+		}
+	}
+
+	writer, err := os.Create(homedir + "/.sscconfig.json")
+	writer.WriteString(defaultSettings)
 
 	if err != nil {
 		panic(err)
