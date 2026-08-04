@@ -68,6 +68,20 @@ func main() {
 			println(core.CatFileUsage)
 		}
 
+	case "config":
+
+		if len(args) < 3 && args[2] != "-c" && args[2] != "--change-setting" {
+			panic("Command 'config' requires a flag and an argument.")
+		}
+
+		switch args[2] {
+		case "-s", "--setting":
+			core.GetSetting(args[3])
+
+		case "-c", "--change-setting":
+			core.ChangeSetting(args[3], args[4])
+		}
+
 	case "revert":
 		// Revert CWD to a previous commit
 
