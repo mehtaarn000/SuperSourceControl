@@ -39,6 +39,15 @@ func GetSetting(setting string) string {
 
 // ChangeSetting changes a setting in the .sscconfig.json file in home directory
 func ChangeSetting(setting string, new_setting string) {
+
+	// If the user changes the default branch setting, validate the new branch name
+	if setting == "defaultBranch" {
+		if !validateBranchName(new_setting) {
+			panic("Invalid branch name: '" + new_setting + "'")
+		}
+		
+	}
+
 	// Get .sscconfig.json file from home directory
 	homedir, err := os.UserHomeDir()
 	get_settings, err := ioutil.ReadFile(homedir + "/.sscconfig.json")
