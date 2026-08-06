@@ -12,42 +12,41 @@ import (
 	"sort"
 )
 
-
 func Find(a []string, x string) int {
-    for i, n := range a {
-        if x == n {
-            return i
-        }
-    }
-    return len(a)
+	for i, n := range a {
+		if x == n {
+			return i
+		}
+	}
+	return len(a)
 }
 
 func Intersection(s1, s2 []string) (inter []string) {
-    hash := make(map[string]bool)
-    for _, e := range s1 {
-        hash[e] = true
-    }
-    for _, e := range s2 {
-        // If elements present in the hashmap then append intersection list.
-        if !hash[e] {
-            inter = append(inter, e)
-        }
-    }
-    //Remove dups from slice.
-    inter = removeDups(inter)
-    return
+	hash := make(map[string]bool)
+	for _, e := range s1 {
+		hash[e] = true
+	}
+	for _, e := range s2 {
+		// If elements present in the hashmap then append intersection list.
+		if !hash[e] {
+			inter = append(inter, e)
+		}
+	}
+	//Remove dups from slice.
+	inter = removeDups(inter)
+	return
 }
 
 //Remove dups from slice.
-func removeDups(elements []string)(nodups []string) {
-    encountered := make(map[string]bool)
-    for _, element := range elements {
-        if !encountered[element] {
-            nodups = append(nodups, element)
-            encountered[element] = true
-        }
-    }
-    return
+func removeDups(elements []string) (nodups []string) {
+	encountered := make(map[string]bool)
+	for _, element := range elements {
+		if !encountered[element] {
+			nodups = append(nodups, element)
+			encountered[element] = true
+		}
+	}
+	return
 }
 
 // ExistInArray is used to check if a hash is in the log
@@ -78,5 +77,3 @@ func DeleteEmpty(s []string) []string {
 	}
 	return r
 }
-
-

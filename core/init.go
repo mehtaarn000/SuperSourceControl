@@ -26,11 +26,11 @@ func Init(branch string) {
 	|-- objects/
 	|-- tmp/
 	|-- branch (default = master)
-	|-- trees	
+	|-- trees
 	*/
 
 	// Create dirs
-	err := os.MkdirAll(".ssc/branches/" + branch, 0777)
+	err := os.MkdirAll(".ssc/branches/"+branch, 0777)
 	err = os.MkdirAll(".ssc/objects", 0777)
 	err = os.MkdirAll(".ssc/tmp", 0777)
 

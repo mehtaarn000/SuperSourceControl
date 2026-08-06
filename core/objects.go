@@ -11,8 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"ssc/zlibutils"
 	"ssc/utils"
+	"ssc/zlibutils"
 	"strings"
 )
 
@@ -51,14 +51,14 @@ func CreateCommit(c Commit) {
 	writer, err := os.Create(filename)
 	writer.WriteString(commit[7+lenoflen:])
 	zlibutils.CompressFile(map[string]string{filename: hash})
-	
+
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
 	defer f.Close()
 
 	f.WriteString(hash + "\n")
 
 	// Write commit to commitlog
-	writeToLog, err := os.OpenFile(".ssc/branches/" + c.Branch + "/commitlog", os.O_APPEND|os.O_WRONLY, 0644)
+	writeToLog, err := os.OpenFile(".ssc/branches/"+c.Branch+"/commitlog", os.O_APPEND|os.O_WRONLY, 0644)
 	defer writeToLog.Close()
 	writeToLog.WriteString(hash + "\n")
 

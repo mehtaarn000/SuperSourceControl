@@ -7,8 +7,8 @@ package core
 
 import (
 	"io/ioutil"
-	"strings"
 	"ssc/utils"
+	"strings"
 )
 
 // Log lists the commits from the commitlog

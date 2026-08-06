@@ -1,11 +1,11 @@
 package core
 
 import (
+	"bufio"
 	"encoding/json"
+	"github.com/tidwall/sjson"
 	"io/ioutil"
 	"os"
-	"github.com/tidwall/sjson"
-	"bufio"
 )
 
 // GetSetting gets the passed setting from the .sscconfig.json file in home directory
@@ -24,7 +24,7 @@ func GetSetting(setting string) string {
 
 	// to parse setting
 	value := objmap[setting]
-	
+
 	// map[value that doesn't exist] returns an empty string
 	if value == "" || value == "\n" {
 		panic("Setting '" + setting + "' doesn't exist.")
@@ -45,7 +45,7 @@ func ChangeSetting(setting string, new_setting string) {
 		if !validateBranchName(new_setting) {
 			panic("Invalid branch name: '" + new_setting + "'")
 		}
-		
+
 	}
 
 	// Get .sscconfig.json file from home directory
@@ -79,7 +79,7 @@ func DefaultSettings(force bool) {
 	"commitMessagePrompt": "Input a commit message: ",
 	"forceBranchDeletion": "false"
 }`
-	
+
 	if !force {
 		scanner := bufio.NewScanner(os.Stdin)
 		for {
@@ -91,7 +91,7 @@ func DefaultSettings(force bool) {
 				break
 			}
 		}
-		
+
 		if confirm == "Y" || confirm == "y" {
 			writer, err := os.Create(homedir + "/.sscconfig.json")
 			writer.WriteString(defaultSettings)
