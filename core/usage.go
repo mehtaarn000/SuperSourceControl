@@ -37,6 +37,8 @@ const LogUsage = `Usage of ssc log:
 Flags:
 	-n, --number [number of commits (int)] Print x many commits with the most recent being on the top
 	-r, --reverse [number of commits (int)] Print x many commits with the most recent being on the bottom
+	-m, --max Print all commits with the most recent being on the top
+	-mr, --max-reverse Print all commits with the most recent being on the bottom
 	-h, --help Print this message`
 
 const HashObjectUsage = `Usage of ssc hash-object:
@@ -57,12 +59,12 @@ Flags:
 	-n, --new [branch name] Create branch with argument as name
 	-ns, --new-switch [branch name] Create and switch to branch with argument as name
 	-s, --switch [branch name] Switch branches
-	-d, -D, --delete [branch name] [--force] Delete a branch (without the force option, ssc prompts the user if they want to proceed with the action)
+	-d, -D, --delete [branch name] [--force] Delete a branch (without the force option, ssc prompts to proceed with the action)
 	-h, --help Print this message`
 
 const ConfigUsage = `Usage of ssc config:
 Flags:
 	-s, --setting [setting] Get a setting
 	-c, --change-setting [setting] [new value] Change a setting
-	-d, --default [--force] Restore settings to default (without the force option, ssc prompts the user if they want to proceed with the action)
+	-d, --default [--force] Restore settings to default (without the force option, ssc prompts to proceed with the action)
 	-h, --help Print this message`
