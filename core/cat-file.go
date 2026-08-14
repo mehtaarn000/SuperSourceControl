@@ -25,7 +25,7 @@ func getContent(hash string) string {
 	content, err := ioutil.ReadFile(".ssc/tmp/" + hash)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	os.Remove(".ssc/tmp/" + hash)
@@ -42,7 +42,7 @@ func PrintType(hash string) {
 	bytedata, err := ioutil.ReadFile(".ssc/commitlog")
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	commitlog := strings.Split(string(bytedata), "\n")
@@ -73,7 +73,7 @@ func PrintType(hash string) {
 		os.Exit(0)
 	}
 
-	//panic("Object with hash '" + hash + "' does not exist.")
+	//utils.Exit("Object with hash '" + hash + "' does not exist.")
 }
 
 // PrintSize prints an decoded objects size (basically the file itself)
@@ -82,7 +82,7 @@ func PrintSize(hash string) {
 	file, err := os.Stat(".ssc/tmp/" + hash)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	println(file.Size())
@@ -94,7 +94,7 @@ func PrintZlibSize(hash string) {
 	file, err := os.Stat(".ssc/objects/" + hash)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	println(file.Size())

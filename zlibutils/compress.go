@@ -11,6 +11,7 @@ import (
 	"compress/zlib"
 	"io/ioutil"
 	"os"
+	"ssc/utils"
 )
 
 // CompressFile takes a filename list of strings and an outhash list of strings
@@ -19,7 +20,7 @@ func CompressFile(fileToHash map[string]string) {
 		rawfile, err := os.Open(file)
 
 		if err != nil {
-			panic(err)
+			utils.Exit(err)
 		}
 		defer rawfile.Close()
 
@@ -33,7 +34,7 @@ func CompressFile(fileToHash map[string]string) {
 		_, err = buffer.Read(rawbytes)
 
 		if err != nil {
-			panic(err)
+			utils.Exit(err)
 		}
 
 		var buf bytes.Buffer

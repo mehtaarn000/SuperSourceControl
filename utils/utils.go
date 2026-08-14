@@ -10,6 +10,8 @@ package utils
 
 import (
 	"sort"
+	"fmt"
+	"os"
 )
 
 func Find(a []string, x string) int {
@@ -76,4 +78,9 @@ func DeleteEmpty(s []string) []string {
 		}
 	}
 	return r
+}
+
+func Exit(s interface{}) {
+	fmt.Println(s)
+	os.Exit(1)
 }

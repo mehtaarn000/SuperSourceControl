@@ -54,7 +54,7 @@ func RevertTo(hash string) {
 			writer.WriteString(filecontent)
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func RevertTo(hash string) {
 		writer.WriteString(filecontent)
 
 		if err != nil {
-			panic(err)
+			utils.Exit(err)
 		}
 	}
 }

@@ -7,6 +7,7 @@ package core
 
 import (
 	"os"
+	"ssc/utils"
 )
 
 func Init(branch string) {
@@ -42,6 +43,6 @@ func Init(branch string) {
 	f, err = os.Create(".ssc/trees")
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }

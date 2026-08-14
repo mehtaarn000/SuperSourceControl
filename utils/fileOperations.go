@@ -32,7 +32,7 @@ func GetFiles() []string {
 	})
 
 	if err != nil {
-		panic(err)
+		Exit(err)
 	}
 
 	return files
@@ -49,7 +49,7 @@ func RemoveEverything() {
 	})
 
 	if err != nil {
-		panic(err)
+		Exit(err)
 	}
 }
 

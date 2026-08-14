@@ -7,13 +7,14 @@ package core
 
 import (
 	"encoding/hex"
-	"golang.org/x/crypto/ripemd160"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"ssc/utils"
 	"ssc/zlibutils"
 	"strings"
+
+	"golang.org/x/crypto/ripemd160"
 )
 
 // CreateCommit creates a commit, compresses it, and writes it to a file.
@@ -65,7 +66,7 @@ func CreateCommit(c Commit) {
 	println(hash)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 }
@@ -100,7 +101,7 @@ func CreateTree() string {
 	defer f.Close()
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	f.WriteString(hash + "\n")
@@ -131,7 +132,7 @@ func createBlobs(filenames []string) string {
 		content := "blob " + string(rune(bloblength)) + string(raw)
 
 		if err != nil {
-			panic(err)
+			utils.Exit(err)
 		}
 
 		hasher := ripemd160.New()

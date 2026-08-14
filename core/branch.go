@@ -2,10 +2,12 @@ package core
 
 import (
 	"bufio"
-	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 	"io/ioutil"
 	"os"
+	"ssc/utils"
 	"strings"
+
+	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
 func validateBranchName(name string) bool {
@@ -13,7 +15,7 @@ func validateBranchName(name string) bool {
 	match := newmatcher.Matcher([]byte(name), 0).MatchString(name, 0)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	return match
@@ -22,7 +24,7 @@ func validateBranchName(name string) bool {
 func CreateBranch(name string) {
 	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
 		if os.IsExist(err) {
-			panic("Branch '" + name + "' already exists.")
+			utils.Exit("Branch '" + name + "' already exists.")
 		}
 	}
 
@@ -32,13 +34,13 @@ func CreateBranch(name string) {
 	head := array[0]
 
 	if head == "" || head == "\n" {
-		panic("At least 1 commit must be made on the default branch before new branches can be created.")
+		utils.Exit("At least 1 commit must be made on the default branch before new branches can be created.")
 	}
 
 	match := validateBranchName(name)
 
 	if !match {
-		panic("Invalid branch name: '" + name + "'")
+		utils.Exit("Invalid branch name: '" + name + "'")
 	}
 
 	err = os.Mkdir(".ssc/branches/"+name, 0777)
@@ -48,7 +50,7 @@ func CreateBranch(name string) {
 	f.WriteString(head + "\n")
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }
 
@@ -57,7 +59,7 @@ func SwitchBranch(name string) {
 	// TODO Add feature that stores uncommitted changes when switching branches
 	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
 		if os.IsNotExist(err) {
-			panic("Branch '" + name + "' does not exist.")
+			utils.Exit("Branch '" + name + "' does not exist.")
 		}
 	}
 
@@ -79,7 +81,7 @@ func SwitchBranch(name string) {
 	}
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 
 	println("Switched to branch '" + name + "'")
@@ -90,13 +92,13 @@ var confirm string
 func DeleteBranch(name string, force bool) {
 	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
 		if os.IsNotExist(err) {
-			panic("Branch '" + name + "' does not exist.")
+			utils.Exit("Branch '" + name + "' does not exist.")
 		}
 	}
 
 	branch, err := ioutil.ReadFile(".ssc/branch")
 	if name == string(branch) {
-		panic("Cannot delete current branch. Run   ssc branch -s [branch name]  to move to another branch or run   ssc branch -ns [branch name] to create and switch to a new branch.")
+		utils.Exit("Cannot delete current branch. Run   ssc branch -s [branch name]  to move to another branch or run   ssc branch -ns [branch name] to create and switch to a new branch.")
 	}
 
 	if !force {
@@ -115,7 +117,7 @@ func DeleteBranch(name string, force bool) {
 			err := os.RemoveAll(".ssc/branches/" + name)
 
 			if err != nil {
-				panic(err)
+				utils.Exit(err)
 			}
 
 		} else {
@@ -126,6 +128,6 @@ func DeleteBranch(name string, force bool) {
 	err = os.RemoveAll(".ssc/branches/" + name)
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }

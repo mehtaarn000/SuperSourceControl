@@ -7,9 +7,11 @@ package core
 
 import (
 	"encoding/hex"
-	"golang.org/x/crypto/ripemd160"
 	"io/ioutil"
+	"ssc/utils"
 	"ssc/zlibutils"
+
+	"golang.org/x/crypto/ripemd160"
 )
 
 // Utility function to turn a file/stdin into a blob and return the blob's hash
@@ -47,7 +49,7 @@ func PrintFileHash(filename string) {
 	println(hashObject(filecontent))
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }
 
@@ -66,6 +68,6 @@ func WriteFileHash(filename string, quiet bool) {
 	}
 
 	if err != nil {
-		panic(err)
+		utils.Exit(err)
 	}
 }
