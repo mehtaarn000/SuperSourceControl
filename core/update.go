@@ -23,7 +23,7 @@ rm -rf "/tmp/SuperSourceControl"
 `
 
 // Update ssc on a Unix-like system
-func BashUpdate() {
+func Update() {
 	switch runtime.GOOS {
 	case "darwin", "freebsd", "openbsd", "linux", "netbsd":
 		err := ioutil.WriteFile("./.ssc/tmp/update.sh", []byte(bash_script), 0777)
