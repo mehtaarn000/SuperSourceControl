@@ -29,3 +29,13 @@ ssc log -m
 
 ## Usage
 Simpily run `ssc --help` to see usage.
+
+## Update version
+On Unix-like systems, two dependencies are required. `jq` and `curl`. You can use your operating systems package manager to install these.
+When you are ready to update, run either of the following commands:
+
+`ssc update`
+
+or if you are using an older version of SuperSourceControl:
+
+`curl https://raw.githubusercontent.com/mehtaarn000/SuperSourceControl/master/update.sh | sh`
