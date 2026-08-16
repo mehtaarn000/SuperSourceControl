@@ -186,12 +186,15 @@ func main() {
 			// Open editor with file: .ssc/tmp/message.txt
 			// Message is read from file when editor is exited
 			// Create a commit with this message
-			//TODO add default editor
+
+			editor := ""
 			if len(args) < 4 {
-				utils.Exit("Flag 'e' or 'editor' requires a value.")
+				editor = core.GetSetting("editor")
+			} else {
+				editor = args[3]
 			}
 
-			cmd := exec.Command(args[3], ".ssc/tmp/message.txt")
+			cmd := exec.Command(editor, ".ssc/tmp/message.txt")
 			err := cmd.Run()
 
 			branch, err := ioutil.ReadFile(".ssc/branch")

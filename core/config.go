@@ -7,11 +7,12 @@ package core
 
 import (
 	"bufio"
+	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"os"
 	"ssc/utils"
-
+	"runtime"
 	"github.com/tidwall/sjson"
 )
 
@@ -79,13 +80,28 @@ func DefaultSettings(force bool) {
 	// Get .sscconfig.json file from home directory
 	homedir, err := os.UserHomeDir()
 
+	// Default editor is vi
+	editor := "vi"
+
+	switch runtime.GOOS {
+	case "darwin", "freebsd", "openbsd", "linux", "netbsd":
+		editor = os.Getenv("EDITOR")
+	
+	case "windows":
+		editor = "notepad"
+	
+	}
+
 	// Aliases may be implemented in the future
 	defaultSettings := `{
 	"defaultBranch": "master",
 	"aliases": {},
 	"commitMessagePrompt": "Input a commit message: ",
-	"forceBranchDeletion": "false"
+	"forceBranchDeletion": "false",
+	"editor": "%s"
 }`
+
+	defaultSettings = fmt.Sprintf(defaultSettings, editor)
 
 	if !force {
 		scanner := bufio.NewScanner(os.Stdin)
