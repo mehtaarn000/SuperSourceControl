@@ -1,48 +1,33 @@
-/* Copyright © 2021
-Author : mehtaarn000
-Email : arnavm834@gmail.com
-*/
-
 package core
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"ssc/utils"
 )
 
 func Init(branch string) {
-	// If .ssc repo already exists
-	if _, err := os.Stat(".ssc"); err != nil {
-		if os.IsExist(err) {
-			print("Repository already exists.")
-			os.Exit(0)
-		}
+	if err := initRepository(branch); err != nil { utils.Exit(err) }
+}
+
+func initRepository(branch string) error {
+	if !validateBranchName(branch) { return fmt.Errorf("invalid branch name: %q", branch) }
+	// Exclusive creation prevents reinitialization from truncating history.
+	if err := os.Mkdir(".ssc", 0755); err != nil { return err }
+	complete := false
+	defer func() { if !complete { os.RemoveAll(".ssc") } }()
+	for _, dir := range []string{filepath.Join(".ssc", "branches", branch), ".ssc/objects", ".ssc/tmp"} {
+		if err := os.MkdirAll(dir, 0755); err != nil { return err }
 	}
-
-	/* Initial repository file structure:
-	.ssc/
-	|-- branches/
-	    |-- master/
-		    |-- commitlog
-	|-- objects/
-	|-- tmp/
-	|-- branch (default = master)
-	|-- trees
-	*/
-
-	// Create dirs
-	err := os.MkdirAll(".ssc/branches/"+branch, 0777)
-	err = os.MkdirAll(".ssc/objects", 0777)
-	err = os.MkdirAll(".ssc/tmp", 0777)
-
-	// Create files
-	f, err := os.Create(".ssc/branch")
-	f.WriteString("master")
-
-	f, err = os.Create(".ssc/branches/" + branch + "/commitlog")
-	f, err = os.Create(".ssc/trees")
-
-	if err != nil {
-		utils.Exit(err)
+	for path, content := range map[string]string{
+		".ssc/branch": branch,
+		filepath.Join(".ssc", "branches", branch, "commitlog"): "",
+		".ssc/trees": "",
+	} {
+		if err := ioutil.WriteFile(path, []byte(content), 0644); err != nil { return err }
 	}
+	complete = true
+	return nil
 }

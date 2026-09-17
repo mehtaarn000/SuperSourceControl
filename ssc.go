@@ -39,18 +39,15 @@ func main() {
 
 	// If the user runs 'init'
 	if args[1] == "init" {
-		if len(args) > 3 {
-
-			switch args[2] {
-			case "-b", "--branch-name":
-				core.Init(args[3])
-				os.Exit(0)
-			}
-		} else {
-			default_branch := core.GetSetting("defaultBranch")
-			core.Init(default_branch)
-			os.Exit(0)
+		switch {
+		case len(args) == 2:
+			core.Init(core.GetSetting("defaultBranch"))
+		case len(args) == 4 && (args[2] == "-b" || args[2] == "--branch-name"):
+			core.Init(args[3])
+		default:
+			utils.Exit("Usage: ssc init [-b | --branch-name <branch>]")
 		}
+		return
 	}
 
 	// If the .ssc directory does not exist
