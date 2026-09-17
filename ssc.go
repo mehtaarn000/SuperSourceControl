@@ -35,6 +35,8 @@ func main() {
 		os.Exit(0)
 	}
 
+	core.EnsureConfig()
+
 	// If the user runs 'init'
 	if args[1] == "init" {
 		if len(args) > 3 {
@@ -56,15 +58,6 @@ func main() {
 		utils.Exit("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
 
-	homedir, err := os.UserHomeDir()
-	if !utils.FileExists(homedir + "/.sscconfig.json") {
-		println("Creating the missing $HOME/.sscconfig.json file with default settings.")
-		core.DefaultSettings(true)
-	}
-
-	if err != nil {
-		utils.Exit(err)
-	}
 
 	switch args[1] {
 	case "cat-file":

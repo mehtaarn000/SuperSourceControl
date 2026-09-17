@@ -7,7 +7,6 @@ package core
 
 import (
 	"bufio"
-	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -80,28 +79,7 @@ func DefaultSettings(force bool) {
 	// Get .sscconfig.json file from home directory
 	homedir, err := os.UserHomeDir()
 
-	// Default editor is vi
-	editor := "vi"
-
-	switch runtime.GOOS {
-	case "darwin", "freebsd", "openbsd", "linux", "netbsd":
-		editor = os.Getenv("EDITOR")
-	
-	case "windows":
-		editor = "notepad"
-	
-	}
-
-	// Aliases may be implemented in the future
-	defaultSettings := `{
-	"defaultBranch": "master",
-	"aliases": {},
-	"commitMessagePrompt": "Input a commit message: ",
-	"forceBranchDeletion": "false",
-	"editor": "%s"
-}`
-
-	defaultSettings = fmt.Sprintf(defaultSettings, editor)
+	defaultSettings := defaultSettingsJSON()
 
 	if !force {
 		scanner := bufio.NewScanner(os.Stdin)
@@ -133,4 +111,36 @@ func DefaultSettings(force bool) {
 	if err != nil {
 		utils.Exit(err)
 	}
+}
+
+// EnsureConfig initializes settings before commands such as init read them.
+func EnsureConfig() {
+	homedir, err := os.UserHomeDir()
+	if err != nil { utils.Exit(err) }
+	if err := ensureConfig(homedir + "/.sscconfig.json"); err != nil { utils.Exit(err) }
+}
+
+func ensureConfig(path string) error {
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+	if os.IsExist(err) { return nil }
+	if err != nil { return err }
+	_, err = f.WriteString(defaultSettingsJSON())
+	closeErr := f.Close()
+	if err != nil { return err }
+	return closeErr
+}
+
+func defaultSettingsJSON() string {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vi"
+		if runtime.GOOS == "windows" { editor = "notepad" }
+	}
+	settings := map[string]interface{}{
+		"defaultBranch": "master", "aliases": map[string]string{},
+		"commitMessagePrompt": "Input a commit message: ",
+		"forceBranchDeletion": "false", "editor": editor,
+	}
+	data, _ := json.MarshalIndent(settings, "", "  ")
+	return string(data) + "\n"
 }
