@@ -9,7 +9,8 @@ const Usage = `Usage of ssc:
 Standard:
 	commit [flags] (argument) [options] Create a commit
 	log [flags] (argument) List recent commits
-	init Initilize a repository
+	init [-b | --branch-name <branch>] Initialize a repository
+	branch [flags] (argument) Create, switch, or delete a branch
 	revert [flags] (argument) Revert repository to previous commit
 	config [flags] (argument) Handle the ssc configuration file
 

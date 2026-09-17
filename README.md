@@ -40,3 +40,38 @@ When you are ready to update, run either of the following commands:
 or if you are using an older version of SuperSourceControl:
 
 `curl https://raw.githubusercontent.com/mehtaarn000/SuperSourceControl/master/update.sh | sh`
+
+## Initialization and branches
+
+`ssc init` creates the default branch from your settings, creating the settings
+file automatically on first use. Use `ssc init -b main` to choose a branch for a
+new repository. Running init in an existing repository fails without changing
+its history.
+
+After making at least one commit, use:
+
+```sh
+ssc branch -n feature       # Create a branch with the current branch's history
+ssc branch -s feature      # Switch to its latest committed snapshot
+ssc branch -ns experiment  # Create and switch in one command
+ssc branch -s main
+ssc branch -d experiment   # Confirm deletion, or append --force
+```
+
+New branches inherit the complete current history, including the latest commit.
+Branch names may use namespaces such as `feature/login`, but a branch cannot
+also serve as a namespace for another branch. Existing branches cannot be
+recreated, and the active branch cannot be deleted.
+
+Switching between different commit tips replaces working files with the target
+snapshot, including deleting files absent from it. Commit changes you want to
+keep before switching. Switching to the current branch or another branch at the
+same tip leaves working files alone. Missing or unreadable snapshot objects are
+checked before restoring files; an operating-system write failure during
+restoration can still leave a partially restored working directory.
+
+## Development checks
+
+Run `go test ./...` for initialization and branch regression tests, and
+`go build -o ssc .` to build the CLI. Branch-name validation uses the Go standard
+library and does not require PCRE.

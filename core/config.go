@@ -8,11 +8,11 @@ package core
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/tidwall/sjson"
 	"io/ioutil"
 	"os"
-	"ssc/utils"
 	"runtime"
-	"github.com/tidwall/sjson"
+	"ssc/utils"
 )
 
 // GetSetting gets the passed setting from the .sscconfig.json file in home directory
@@ -116,17 +116,27 @@ func DefaultSettings(force bool) {
 // EnsureConfig initializes settings before commands such as init read them.
 func EnsureConfig() {
 	homedir, err := os.UserHomeDir()
-	if err != nil { utils.Exit(err) }
-	if err := ensureConfig(homedir + "/.sscconfig.json"); err != nil { utils.Exit(err) }
+	if err != nil {
+		utils.Exit(err)
+	}
+	if err := ensureConfig(homedir + "/.sscconfig.json"); err != nil {
+		utils.Exit(err)
+	}
 }
 
 func ensureConfig(path string) error {
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
-	if os.IsExist(err) { return nil }
-	if err != nil { return err }
+	if os.IsExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
 	_, err = f.WriteString(defaultSettingsJSON())
 	closeErr := f.Close()
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	return closeErr
 }
 
@@ -134,7 +144,9 @@ func defaultSettingsJSON() string {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vi"
-		if runtime.GOOS == "windows" { editor = "notepad" }
+		if runtime.GOOS == "windows" {
+			editor = "notepad"
+		}
 	}
 	settings := map[string]interface{}{
 		"defaultBranch": "master", "aliases": map[string]string{},

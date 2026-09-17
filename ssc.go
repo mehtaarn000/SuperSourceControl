@@ -55,7 +55,6 @@ func main() {
 		utils.Exit("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
 
-
 	switch args[1] {
 	case "cat-file":
 
