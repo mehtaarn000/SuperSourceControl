@@ -7,6 +7,8 @@ package core
 
 import (
 	"bufio"
+	"fmt"
+	"path/filepath"
 	"io/ioutil"
 	"os"
 	"ssc/utils"
@@ -32,36 +34,44 @@ func validateBranchName(name string) bool {
 }
 
 func CreateBranch(name string) {
-	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
-		if os.IsExist(err) {
-			utils.Exit("Branch '" + name + "' already exists.")
-		}
+	if err := createBranch(name); err != nil { utils.Exit(err) }
+}
+
+func readBranchLog(name string) ([]string, error) {
+	if !validateBranchName(name) { return nil, fmt.Errorf("invalid branch name: %q", name) }
+	data, err := ioutil.ReadFile(filepath.Join(".ssc", "branches", name, "commitlog"))
+	if err != nil { return nil, err }
+	return strings.Fields(string(data)), nil
+}
+
+func currentBranch() (string, error) {
+	data, err := ioutil.ReadFile(".ssc/branch")
+	if err != nil { return "", err }
+	name := string(data)
+	if !validateBranchName(name) { return "", fmt.Errorf("invalid current branch: %q", name) }
+	return name, nil
+}
+
+func createBranch(name string) error {
+	if !validateBranchName(name) { return fmt.Errorf("invalid branch name: %q", name) }
+	current, err := currentBranch()
+	if err != nil { return err }
+	commits, err := readBranchLog(current)
+	if err != nil { return err }
+	if len(commits) == 0 { return fmt.Errorf("make at least one commit before creating a branch") }
+	dir := filepath.Join(".ssc", "branches", name)
+	// A branch cannot be nested beneath another branch's storage directory.
+	for parent := filepath.Dir(dir); parent != filepath.Join(".ssc", "branches"); parent = filepath.Dir(parent) {
+		if _, err := os.Stat(filepath.Join(parent, "commitlog")); err == nil {
+			return fmt.Errorf("branch name conflicts with an existing branch: %q", name)
+		} else if !os.IsNotExist(err) { return err }
 	}
-
-	currentbranch, err := ioutil.ReadFile(".ssc/branch")
-	othercommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
-	array := strings.Split(string(othercommitlog), "\n")
-	head := array[0]
-
-	if head == "" || head == "\n" {
-		utils.Exit("At least 1 commit must be made on the default branch before new branches can be created.")
-	}
-
-	match := validateBranchName(name)
-
-	if !match {
-		utils.Exit("Invalid branch name: '" + name + "'")
-	}
-
-	err = os.Mkdir(".ssc/branches/"+name, 0777)
-	f, err := os.Create(".ssc/branches/" + name + "/commitlog")
-	defer f.Close()
-
-	f.WriteString(head + "\n")
-
-	if err != nil {
-		utils.Exit(err)
-	}
+	if err := os.MkdirAll(filepath.Dir(dir), 0755); err != nil { return err }
+	if err := os.Mkdir(dir, 0755); err != nil { return err }
+	// Inherit the full history, whose final entry is the current tip.
+	err = ioutil.WriteFile(filepath.Join(dir, "commitlog"), []byte(strings.Join(commits, "\n") + "\n"), 0644)
+	if err != nil { os.RemoveAll(dir) }
+	return err
 }
 
 func SwitchBranch(name string) {
