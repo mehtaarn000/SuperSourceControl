@@ -99,44 +99,29 @@ func switchBranch(name string) error {
 var confirm string
 
 func DeleteBranch(name string, force bool) {
-	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
-		if os.IsNotExist(err) {
-			utils.Exit("Branch '" + name + "' does not exist.")
-		}
-	}
-
-	branch, err := ioutil.ReadFile(".ssc/branch")
-	if name == string(branch) {
-		utils.Exit("Cannot delete current branch. Run   ssc branch -s [branch name]  to move to another branch or run   ssc branch -ns [branch name] to create and switch to a new branch.")
-	}
-
+	if err := checkBranchDeletion(name); err != nil { utils.Exit(err) }
 	if !force {
+		print("Are you sure you want to delete branch: " + name + " [y/n]?")
 		scanner := bufio.NewScanner(os.Stdin)
-		for {
-			print("Are you sure you want to delete branch: " + name + " [y/n]?")
-			scanner.Scan()
-
-			confirm = scanner.Text()
-			if confirm == "Y" || confirm == "N" || confirm == "y" || confirm == "n" {
-				break
-			}
-		}
-
-		if confirm == "Y" || confirm == "y" {
-			err := os.RemoveAll(".ssc/branches/" + name)
-
-			if err != nil {
-				utils.Exit(err)
-			}
-
-		} else {
-			return
-		}
+		if !scanner.Scan() || !strings.EqualFold(strings.TrimSpace(scanner.Text()), "y") { return }
 	}
+	if err := deleteBranch(name); err != nil { utils.Exit(err) }
+}
 
-	err = os.RemoveAll(".ssc/branches/" + name)
-
-	if err != nil {
-		utils.Exit(err)
+func checkBranchDeletion(name string) error {
+	if _, err := readBranchLog(name); err != nil { return err }
+	current, err := currentBranch()
+	if err != nil { return err }
+	if current == name { return fmt.Errorf("cannot delete the current branch: %q", name) }
+	entries, err := ioutil.ReadDir(filepath.Join(".ssc", "branches", name))
+	if err != nil { return err }
+	if len(entries) != 1 || entries[0].Name() != "commitlog" {
+		return fmt.Errorf("branch %q contains unexpected entries; refusing deletion", name)
 	}
+	return nil
+}
+
+func deleteBranch(name string) error {
+	if err := checkBranchDeletion(name); err != nil { return err }
+	return os.RemoveAll(filepath.Join(".ssc", "branches", name))
 }

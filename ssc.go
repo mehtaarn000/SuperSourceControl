@@ -310,39 +310,30 @@ func main() {
 		}
 
 	case "branch":
-
-		if len(args) < 3 {
-			utils.Exit("Command 'branch' requires a flag and an argument.")
+		if len(args) == 3 && (args[2] == "-h" || args[2] == "--help") {
+			println(core.BranchUsage)
+			return
 		}
-
+		if len(args) < 4 {
+			utils.Exit(core.BranchUsage)
+		}
+		deleting := args[2] == "-d" || args[2] == "-D" || args[2] == "--delete"
+		if len(args) != 4 && !(deleting && len(args) == 5 && args[4] == "--force") {
+			utils.Exit(core.BranchUsage)
+		}
 		switch args[2] {
-		// Create a new branch
 		case "-n", "--new":
 			core.CreateBranch(args[3])
-
 		case "-ns", "--new-switch":
 			core.CreateBranch(args[3])
 			core.SwitchBranch(args[3])
-
 		case "-s", "--switch":
 			core.SwitchBranch(args[3])
-
 		case "-d", "-D", "--delete":
-			force_deletion_setting := core.GetSetting("forceBranchDeletion")
-
-			if len(args) == 5 && args[4] == "--force" {
-				core.DeleteBranch(args[3], true)
-			} else if force_deletion_setting == "true" {
-				core.DeleteBranch(args[3], true)
-			} else {
-				core.DeleteBranch(args[3], false)
-			}
-
-		case "-h", "--help":
-			println(core.BranchUsage)
-
+			force := len(args) == 5 || core.GetSetting("forceBranchDeletion") == "true"
+			core.DeleteBranch(args[3], force)
 		default:
-			println(core.BranchUsage)
+			utils.Exit(core.BranchUsage)
 		}
 
 	case "update":
