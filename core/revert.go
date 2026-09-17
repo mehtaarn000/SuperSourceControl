@@ -1,73 +1,63 @@
-/* Copyright © 2021
-Author : mehtaarn000
-Email : arnavm834@gmail.com
-*/
-
 package core
 
 import (
+	"compress/zlib"
+	"encoding/hex"
+	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"ssc/utils"
 	"strings"
 )
 
-// RevertTo reverts the CWD to the tree of the hash passed
-// any uncommitted changes will be lost
+// RevertTo restores a snapshot, replacing uncommitted working files.
 func RevertTo(hash string) {
-	// Get content of the commit
-	get_commit := getContent(hash)
-	get_tree := strings.Split(get_commit, "\n")[0][5:]
+	if err := restoreSnapshot(hash); err != nil { utils.Exit(err) }
+}
 
-	// Get content of tree and split it into an array
-	tree := getContent(get_tree)
-	arr := strings.Split(tree, "\n")
+func readObject(hash string) ([]byte, error) {
+	decoded, err := hex.DecodeString(hash)
+	if err != nil || len(decoded) != 20 { return nil, fmt.Errorf("invalid object hash: %q", hash) }
+	f, err := os.Open(filepath.Join(".ssc", "objects", hash))
+	if err != nil { return nil, err }
+	defer f.Close()
+	r, err := zlib.NewReader(f)
+	if err != nil { return nil, err }
+	defer r.Close()
+	return ioutil.ReadAll(r)
+}
 
-	// cwdfiles = files in current working directory (only names not full paths)
-	cwdfiles := utils.GetFiles()
-	filesintree := []string{}
-	hashes := []string{}
-
-	// filesintree and hashes arrays match indexes for files to hashes
-	for _, filehash := range arr {
-		items := strings.Split(filehash, " ")
-		filesintree = append(filesintree, items[0])
-		hashes = append(hashes, items[1])
+func restoreSnapshot(hash string) error {
+	commit, err := readObject(hash)
+	if err != nil { return err }
+	first := strings.SplitN(string(commit), "\n", 2)[0]
+	if !strings.HasPrefix(first, "tree ") { return fmt.Errorf("object is not a commit: %s", hash) }
+	tree, err := readObject(strings.TrimPrefix(first, "tree "))
+	if err != nil { return err }
+	// Load and validate every object before changing working files.
+	files := map[string][]byte{}
+	for _, line := range strings.Split(string(tree), "\n") {
+		if line == "" { continue }
+		sep := strings.LastIndexByte(line, ' ')
+		if sep < 1 { return fmt.Errorf("invalid tree entry: %q", line) }
+		path := filepath.FromSlash(line[:sep])
+		clean := filepath.Clean(path)
+		if filepath.IsAbs(path) || clean == "." || clean == ".." || strings.HasPrefix(clean, ".." + string(os.PathSeparator)) || strings.Contains(clean, ".ssc") {
+			return fmt.Errorf("invalid snapshot path: %q", path)
+		}
+		data, err := readObject(line[sep+1:])
+		if err != nil { return err }
+		files[clean] = data
 	}
-
-	// Get all files not in currentworking directory
-	notincwd := utils.Intersection(filesintree, cwdfiles)
-
-	for _, file := range notincwd {
-		// Remove the file, else create it
-		err := os.Remove(file)
-
-		if err != nil {
-			/*Index in filesintree
-			Get object hash using the index from hashes array
-			Create and write the data to the file*/
-			index := utils.Find(filesintree, file)
-			object := hashes[index]
-
-			filecontent := getContent(object)
-			writer, err := utils.Create(file)
-
-			writer.WriteString(filecontent)
-
-			if err != nil {
-				utils.Exit(err)
-			}
+	for _, path := range utils.GetFiles() {
+		if _, keep := files[filepath.Clean(path)]; !keep {
+			if err := os.Remove(path); err != nil { return err }
 		}
 	}
-
-	// Create needed files
-	for i, hash := range hashes {
-		filecontent := getContent(hash)
-		writer, err := utils.Create(string(filesintree[i]))
-
-		writer.WriteString(filecontent)
-
-		if err != nil {
-			utils.Exit(err)
-		}
+	for path, data := range files {
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil { return err }
+		if err := ioutil.WriteFile(path, data, 0644); err != nil { return err }
 	}
+	return nil
 }

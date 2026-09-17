@@ -75,36 +75,25 @@ func createBranch(name string) error {
 }
 
 func SwitchBranch(name string) {
-	// ALL UNCOMMITTED CHANGES WILL BE LOST
-	// TODO Add feature that stores uncommitted changes when switching branches
-	if _, err := os.Stat(".ssc/branches/" + name); err != nil {
-		if os.IsNotExist(err) {
-			utils.Exit("Branch '" + name + "' does not exist.")
-		}
-	}
-
-	currentbranch, err := ioutil.ReadFile(".ssc/branch")
-
-	writer, err := os.Create(".ssc/branch")
-	writer.WriteString(name)
-
-	othercommitlog, err := ioutil.ReadFile(".ssc/branches/" + name + "/commitlog")
-	array1 := strings.Split(string(othercommitlog), "\n")
-	head1 := array1[0]
-
-	thiscommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
-	array2 := strings.Split(string(thiscommitlog), "\n")
-	head2 := array2[0]
-
-	if head1 != head2 {
-		RevertTo(head1)
-	}
-
-	if err != nil {
-		utils.Exit(err)
-	}
-
+	if err := switchBranch(name); err != nil { utils.Exit(err) }
 	println("Switched to branch '" + name + "'")
+}
+
+func switchBranch(name string) error {
+	commits, err := readBranchLog(name)
+	if err != nil { return err }
+	current, err := currentBranch()
+	if err != nil { return err }
+	if current == name { return nil }
+	if len(commits) == 0 { return fmt.Errorf("branch %q has no commits", name) }
+	oldCommits, err := readBranchLog(current)
+	if err != nil { return err }
+	tip := commits[len(commits)-1]
+	if len(oldCommits) == 0 || oldCommits[len(oldCommits)-1] != tip {
+		if err := restoreSnapshot(tip); err != nil { return err }
+	}
+	// Only change the active branch after its snapshot has been restored.
+	return ioutil.WriteFile(".ssc/branch", []byte(name), 0644)
 }
 
 var confirm string
