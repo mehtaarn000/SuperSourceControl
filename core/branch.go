@@ -11,19 +11,24 @@ import (
 	"os"
 	"ssc/utils"
 	"strings"
-
-	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
+// Branch names are also paths beneath .ssc/branches.
 func validateBranchName(name string) bool {
-	newmatcher, err := pcre.Compile("^(?!/|.*([/.]\\.|//|@\\{|\\\\))[^\040\177 ~^:?*\\[]+(?<!\\.lock|[/.])$", 0)
-	match := newmatcher.Matcher([]byte(name), 0).MatchString(name, 0)
-
-	if err != nil {
-		utils.Exit(err)
+	if name == "" || name == "@" || strings.Contains(name, "..") || strings.Contains(name, "@{") {
+		return false
 	}
-
-	return match
+	for _, ch := range name {
+		if ch <= ' ' || ch == 127 || strings.ContainsRune("~^:?*[\\", ch) {
+			return false
+		}
+	}
+	for _, part := range strings.Split(name, "/") {
+		if part == "" || strings.HasPrefix(part, ".") || strings.HasSuffix(part, ".") || strings.HasSuffix(part, ".lock") || part == "commitlog" {
+			return false
+		}
+	}
+	return true
 }
 
 func CreateBranch(name string) {
