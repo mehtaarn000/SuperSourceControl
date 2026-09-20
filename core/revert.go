@@ -18,7 +18,7 @@ import (
 
 // RevertTo restores a snapshot, replacing uncommitted working files.
 func RevertTo(hash string) {
-	if err := restoreSnapshot(hash); err != nil {
+	if err := withRepositoryLock(func() error { return restoreSnapshot(hash) }); err != nil {
 		utils.Exit(err)
 	}
 }

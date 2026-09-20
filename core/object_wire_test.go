@@ -39,3 +39,16 @@ func TestWireObjectsMatchLocalStorage(t *testing.T) {
 		}
 	}
 }
+
+func TestWireTreeRejectsMetadataAndCaseAliases(t *testing.T) {
+	hash := strings.Repeat("a", 40)
+	for _, tree := range []string{
+		".SSC/branch " + hash, ".Git/config " + hash, "nested/.git/config " + hash,
+		"File " + hash + "\nfile " + hash, "Dir/a " + hash + "\ndir/b " + hash,
+		"trailing. " + hash, "trailing  " + hash,
+	} {
+		if _, _, err := InspectObject("tree", []byte(tree)); err == nil {
+			t.Fatalf("accepted unsafe tree %q", tree)
+		}
+	}
+}

@@ -34,7 +34,7 @@ func validateBranchName(name string) bool {
 }
 
 func CreateBranch(name string) {
-	if err := createBranch(name); err != nil {
+	if err := withRepositoryLock(func() error { return createBranch(name) }); err != nil {
 		utils.Exit(err)
 	}
 }
@@ -101,7 +101,7 @@ func createBranch(name string) error {
 }
 
 func SwitchBranch(name string) {
-	if err := switchBranch(name); err != nil {
+	if err := withRepositoryLock(func() error { return switchBranch(name) }); err != nil {
 		utils.Exit(err)
 	}
 	println("Switched to branch '" + name + "'")
@@ -139,17 +139,20 @@ func switchBranch(name string) error {
 var confirm string
 
 func DeleteBranch(name string, force bool) {
-	if err := checkBranchDeletion(name); err != nil {
-		utils.Exit(err)
-	}
-	if !force {
-		print("Are you sure you want to delete branch: " + name + " [y/n]?")
-		scanner := bufio.NewScanner(os.Stdin)
-		if !scanner.Scan() || !strings.EqualFold(strings.TrimSpace(scanner.Text()), "y") {
-			return
+	err := withRepositoryLock(func() error {
+		if err := checkBranchDeletion(name); err != nil {
+			return err
 		}
-	}
-	if err := deleteBranch(name); err != nil {
+		if !force {
+			print("Are you sure you want to delete branch: " + name + " [y/n]?")
+			scanner := bufio.NewScanner(os.Stdin)
+			if !scanner.Scan() || !strings.EqualFold(strings.TrimSpace(scanner.Text()), "y") {
+				return nil
+			}
+		}
+		return deleteBranch(name)
+	})
+	if err != nil {
 		utils.Exit(err)
 	}
 }

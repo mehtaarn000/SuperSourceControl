@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"ssc/utils"
 	"strings"
+	"time"
 )
 
 // CreateCommit creates an ordinary commit, deriving its parent from the branch tip.
@@ -27,15 +28,15 @@ func createCommit(c Commit) (string, error) {
 	if len(c.Parents) != 0 {
 		return "", fmt.Errorf("ordinary commits derive their parent from the branch tip")
 	}
-	// Serialize commit writers so two commits cannot claim the same branch tip.
-	lock, err := os.OpenFile(".ssc/commit.lock", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	unlock, err := LockRepository(".")
 	if err != nil {
-		return "", fmt.Errorf("cannot acquire commit lock (another commit may be running): %w", err)
-	}
-	defer os.Remove(".ssc/commit.lock")
-	if err := lock.Close(); err != nil {
 		return "", err
 	}
+	defer unlock()
+	return createCommitLocked(c)
+}
+
+func createCommitLocked(c Commit) (string, error) {
 	current, err := currentBranch()
 	if err != nil {
 		return "", err
@@ -104,4 +105,24 @@ func atomicWrite(path string, data []byte) error {
 		return err
 	}
 	return os.Rename(f.Name(), path)
+}
+
+// CommitWorkingTree holds the operation lock throughout snapshot creation.
+func CommitWorkingTree(message, name, email string) error {
+	if err := validateIdentity(name, email); err != nil {
+		return err
+	}
+	return withRepositoryLock(func() error {
+		branch, err := currentBranch()
+		if err != nil {
+			return err
+		}
+		c := Commit{Tree: CreateTree(), Date: time.Now().Format(time.RFC3339), Branch: branch, Message: message, AuthorName: name, AuthorEmail: email}
+		hash, err := createCommitLocked(c)
+		if err != nil {
+			return err
+		}
+		println(hash)
+		return nil
+	})
 }

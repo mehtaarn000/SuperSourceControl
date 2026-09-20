@@ -27,6 +27,7 @@ func InspectObject(kind string, data []byte) (string, []ObjectReference, error) 
 	case "blob":
 	case "tree":
 		seen := map[string]bool{}
+		casePaths := map[string]string{}
 		for _, line := range strings.Split(string(data), "\n") {
 			if line == "" {
 				continue
@@ -39,6 +40,27 @@ func InspectObject(kind string, data []byte) (string, []ObjectReference, error) 
 			if path.IsAbs(name) || path.Clean(name) != name || name == "." || name == ".." || strings.HasPrefix(name, "../") || strings.ContainsAny(name, "\\\x00\r:") || strings.Contains(name, ".ssc") || strings.HasPrefix(name, ".git/") || name == ".git" || !validObjectID(hash) || seen[name] {
 				return "", nil, fmt.Errorf("invalid or duplicate tree path/hash")
 			}
+			folded := strings.ToLower(name)
+			for _, component := range strings.Split(folded, "/") {
+				if strings.HasSuffix(component, ".") || strings.HasSuffix(component, " ") || strings.Contains(component, ".ssc") || component == ".git" {
+					return "", nil, fmt.Errorf("unsafe tree path")
+				}
+				for _, ch := range component {
+					if ch < 32 || ch == 127 {
+						return "", nil, fmt.Errorf("unsafe tree path")
+					}
+				}
+			}
+			components := strings.Split(name, "/")
+			for i := range components {
+				prefix := strings.Join(components[:i+1], "/")
+				key := strings.ToLower(prefix)
+				if prior, ok := casePaths[key]; ok && prior != prefix {
+					return "", nil, fmt.Errorf("case-conflicting tree paths")
+				}
+				casePaths[key] = prefix
+			}
+
 			seen[name] = true
 			refs = append(refs, ObjectReference{Hash: hash, Type: "blob"})
 		}
