@@ -8,118 +8,122 @@ package core
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/tidwall/sjson"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"ssc/utils"
+	"strings"
 )
 
-// GetSetting gets the passed setting from the .sscconfig.json file in home directory
-func GetSetting(setting string) string {
-	// Get .sscconfig.json file from home directory
-	homedir, err := os.UserHomeDir()
-	get_settings, err := ioutil.ReadFile(homedir + "/.sscconfig.json")
-
-	data := []byte(get_settings)
-
-	// Unmarshal/parse data and store it in objmap
-	var objmap map[string]interface{}
-	if err := json.Unmarshal(data, &objmap); err != nil {
-		utils.Exit(err)
+// configPath permits isolated configuration through SSC_CONFIG_FILE.
+func configPath() (string, error) {
+	if path := os.Getenv("SSC_CONFIG_FILE"); path != "" {
+		return path, nil
 	}
-
-	// to parse setting
-	value := objmap[setting]
-
-	// map[value that doesn't exist] returns an empty string
-	if value == "" || value == "\n" {
-		utils.Exit("Setting '" + setting + "' doesn't exist.")
-	}
-
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		utils.Exit(err)
+		return "", err
 	}
-
-	return value.(string)
+	return filepath.Join(homeDir, ".sscconfig.json"), nil
 }
 
-// ChangeSetting changes a setting in the .sscconfig.json file in home directory
-func ChangeSetting(setting string, new_setting string) {
-
-	// If the user changes the default branch setting, validate the new branch name
-	if setting == "defaultBranch" {
-		if !validateBranchName(new_setting) {
-			utils.Exit("Invalid branch name: '" + new_setting + "'")
-		}
-
+func readSettings() (map[string]interface{}, error) {
+	path, err := configPath()
+	if err != nil {
+		return nil, err
 	}
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var settings map[string]interface{}
+	if err := json.Unmarshal(data, &settings); err != nil {
+		return nil, err
+	}
+	if settings == nil {
+		return nil, fmt.Errorf("configuration must be a JSON object")
+	}
+	return settings, nil
+}
 
-	// Get .sscconfig.json file from home directory
-	homedir, err := os.UserHomeDir()
-	get_settings, err := ioutil.ReadFile(homedir + "/.sscconfig.json")
-
-	// Create new settings
-	newsettings, jsonerr := sjson.Set(string(get_settings), setting, new_setting)
-
-	if jsonerr != nil {
+func GetSetting(setting string) string {
+	settings, err := readSettings()
+	if err != nil {
 		utils.Exit(err)
 	}
+	value, ok := settings[setting].(string)
+	if !ok {
+		utils.Exit(fmt.Errorf("setting %q is missing or is not a string", setting))
+	}
+	return value
+}
 
-	// Write new settings back to config file
-	writer, err := os.Create(homedir + "/.sscconfig.json")
-	writer.WriteString(newsettings)
-
+// ConfiguredAuthor requires explicit identity; legacy configs need no migration.
+func ConfiguredAuthor() (string, string, error) {
+	settings, err := readSettings()
 	if err != nil {
+		return "", "", err
+	}
+	name, _ := settings["authorName"].(string)
+	email, _ := settings["authorEmail"].(string)
+	name, email = strings.TrimSpace(name), strings.TrimSpace(email)
+	if err := validateIdentity(name, email); err != nil {
+		return "", "", err
+	}
+	return name, email, nil
+}
+
+func ChangeSetting(setting string, value string) {
+	if setting == "defaultBranch" && !validateBranchName(value) {
+		utils.Exit("Invalid branch name")
+	}
+	if (setting == "authorName" || setting == "authorEmail") && (strings.TrimSpace(value) == "" || strings.ContainsAny(value, "\r\n\x00")) {
+		utils.Exit("Author settings must be nonempty single-line strings")
+	}
+	settings, err := readSettings()
+	if err != nil {
+		utils.Exit(err)
+	}
+	settings[setting] = value
+	data, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		utils.Exit(err)
+	}
+	path, err := configPath()
+	if err != nil {
+		utils.Exit(err)
+	}
+	if err := ioutil.WriteFile(path, append(data, '\n'), 0644); err != nil {
 		utils.Exit(err)
 	}
 }
 
 func DefaultSettings(force bool) {
-	// Get .sscconfig.json file from home directory
-	homedir, err := os.UserHomeDir()
-
-	defaultSettings := defaultSettingsJSON()
-
+	path, err := configPath()
+	if err != nil {
+		utils.Exit(err)
+	}
 	if !force {
+		print("Are you sure you want to restore all settings to default [y/n]?")
 		scanner := bufio.NewScanner(os.Stdin)
-		for {
-			print("Are you sure you want to restore all settings to default [y/n]?")
-			scanner.Scan()
-
-			confirm = scanner.Text()
-			if confirm == "Y" || confirm == "N" || confirm == "y" || confirm == "n" {
-				break
-			}
-		}
-
-		if confirm == "Y" || confirm == "y" {
-			writer, err := os.Create(homedir + "/.sscconfig.json")
-			writer.WriteString(defaultSettings)
-			if err != nil {
-				utils.Exit(err)
-			}
-
-		} else {
+		if !scanner.Scan() || !strings.EqualFold(strings.TrimSpace(scanner.Text()), "y") {
 			return
 		}
 	}
-
-	writer, err := os.Create(homedir + "/.sscconfig.json")
-	writer.WriteString(defaultSettings)
-
-	if err != nil {
+	if err := ioutil.WriteFile(path, []byte(defaultSettingsJSON()), 0644); err != nil {
 		utils.Exit(err)
 	}
 }
 
 // EnsureConfig initializes settings before commands such as init read them.
 func EnsureConfig() {
-	homedir, err := os.UserHomeDir()
+	path, err := configPath()
 	if err != nil {
 		utils.Exit(err)
 	}
-	if err := ensureConfig(homedir + "/.sscconfig.json"); err != nil {
+	if err := ensureConfig(path); err != nil {
 		utils.Exit(err)
 	}
 }
@@ -149,6 +153,7 @@ func defaultSettingsJSON() string {
 		}
 	}
 	settings := map[string]interface{}{
+		"authorName": "", "authorEmail": "",
 		"defaultBranch": "master", "aliases": map[string]string{},
 		"commitMessagePrompt": "Input a commit message: ",
 		"forceBranchDeletion": "false", "editor": editor,

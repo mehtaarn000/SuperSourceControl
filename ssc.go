@@ -51,7 +51,7 @@ func main() {
 	}
 
 	// If the .ssc directory does not exist
-	if _, err := os.Stat(".ssc"); os.IsNotExist(err) {
+	if _, err := os.Stat(".ssc"); os.IsNotExist(err) && args[1] != "config" {
 		utils.Exit("No .ssc directory found. Run  `ssc init`  to initilize the .ssc directory.")
 	}
 
@@ -80,18 +80,24 @@ func main() {
 
 	case "config":
 
-		if len(args) < 3 && args[2] != "-c" && args[2] != "--change-setting" {
+		if len(args) < 3 {
 			utils.Exit("Command 'config' requires a flag and an argument.")
 		}
 
 		switch args[2] {
 		// Get a setting
 		case "-s", "--setting":
+			if len(args) != 4 {
+				utils.Exit(core.ConfigUsage)
+			}
 			setting := core.GetSetting(args[3])
 			println(setting)
 
 		// Change a setting
 		case "-c", "--change-setting":
+			if len(args) != 5 {
+				utils.Exit(core.ConfigUsage)
+			}
 			core.ChangeSetting(args[3], args[4])
 
 		// Restore settings to default
@@ -133,6 +139,15 @@ func main() {
 			utils.Exit("Command 'commit' requires a flag and an argument.")
 		}
 
+		authorName, authorEmail := "", ""
+		if args[2] != "-h" && args[2] != "--help" {
+			var err error
+			authorName, authorEmail, err = core.ConfiguredAuthor()
+			if err != nil {
+				utils.Exit(err)
+			}
+		}
+
 		switch args[2] {
 		// Specify a message, create a commit with given message, and output the new commit hash
 		case "-m", "--message":
@@ -147,7 +162,7 @@ func main() {
 				utils.Exit(err)
 			}
 
-			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: args[3], Branch: string(file)}
+			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: args[3], Branch: string(file)}
 			core.CreateCommit(commit)
 
 		case "-p", "--prompt":
@@ -168,7 +183,7 @@ func main() {
 				utils.Exit(err)
 			}
 
-			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: input, Branch: string(file)}
+			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: input, Branch: string(file)}
 			core.CreateCommit(commit)
 
 		case "-e", "--editor":
@@ -194,7 +209,7 @@ func main() {
 			}
 
 			tree := core.CreateTree()
-			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
+			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
 			core.CreateCommit(commit)
 
 		case "-f", "--file":
@@ -211,7 +226,7 @@ func main() {
 			}
 
 			tree := core.CreateTree()
-			commit := core.Commit{Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
+			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
 			core.CreateCommit(commit)
 
 		case "-h", "--help":
