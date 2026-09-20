@@ -24,6 +24,18 @@ func GetFiles() []string {
 	var files []string
 
 	err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		for _, part := range strings.Split(filepath.ToSlash(path), "/") {
+			if strings.EqualFold(part, ".git") || strings.Contains(strings.ToLower(part), ".ssc") {
+				if info.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+		}
+
 		if info.IsDir() {
 			return nil
 		}

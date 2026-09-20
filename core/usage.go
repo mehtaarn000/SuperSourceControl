@@ -7,6 +7,10 @@ package core
 
 const Usage = `Usage of ssc:
 Standard:
+    clone [--branch <name>] <repository-url> <new-directory> Clone a shared repository
+    remote [repository-url] View or set the remote URL (tokens use SSC_TOKEN)
+    push [--remote <repository-url>] Push the active branch
+    pull [--remote <repository-url>] Fast-forward the active branch
 	serve --config <file> --data <directory> Run the shared repository server
 	commit [flags] (argument) [options] Create a commit
 	log [flags] (argument) List recent commits

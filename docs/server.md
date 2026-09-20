@@ -2,8 +2,8 @@
 
 The server stores SSC objects and shared branch tips. It authenticates bearer
 tokens and applies per-repository read/write grants. It does not run code from
-repositories. Client-side `clone`, `push`, and `pull` commands are the next step;
-this release exposes their storage API, not those CLI commands.
+repositories. Client-side `clone`, `push`, and fast-forward `pull` use this API; see the
+[client guide](client.md) for the developer workflow.
 
 ## Start a server
 
@@ -127,8 +127,8 @@ parent links and author metadata in their hash.
 Legacy commits can be uploaded without rewriting their IDs. Their missing
 parent links are a history boundary: updates requiring ancestry beyond that
 boundary are rejected. Trees with unsafe paths, duplicate paths, paths under
-`.ssc` or root `.git`, and file/directory conflicts are rejected. SSC does not
-yet have an ignore-file feature; avoid committing such metadata into snapshots.
+`.ssc` or root `.git`, and file/directory conflicts are rejected. New snapshots automatically exclude `.git` and `.ssc` metadata. There is no
+configurable ignore-file feature; older snapshots containing metadata are rejected.
 
 Current limits are 8 MiB per decompressed object, 4 KiB per ref-update request,
 32 concurrent authenticated repository requests, and graph validation bounded

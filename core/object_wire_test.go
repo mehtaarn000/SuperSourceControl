@@ -52,3 +52,20 @@ func TestWireTreeRejectsMetadataAndCaseAliases(t *testing.T) {
 		}
 	}
 }
+
+func TestSnapshotsExcludeGitMetadata(t *testing.T) {
+	inRepository(t, "main")
+	writeTestFile(t, "source.go", "package main")
+	writeTestFile(t, ".git/config", "must stay local")
+	tree := CreateTree()
+	data, err := readObject(tree)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), ".git") {
+		t.Fatal("Git metadata entered the snapshot")
+	}
+	if _, refs, err := InspectObject("tree", data); err != nil || len(refs) != 1 {
+		t.Fatal(refs, err)
+	}
+}

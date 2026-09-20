@@ -101,8 +101,8 @@ ordinary commits currently write at most one. The Go API
 `core.IsAncestor(ancestor, descendant)` traverses stored parent links, independent
 of branch logs. It returns an error for missing/corrupt objects and
 `core.ErrLegacyHistory` when older objects prevent a definitive negative answer.
-No merge, push, or pull CLI functionality is included yet; the shared server
-API is described below.
+Clone, push, and fast-forward pull are available through the shared server;
+merging is not implemented yet.
 
 Existing objects are never rewritten. Legacy commits remain readable and appear
 in branch history with an unknown author. New commits can reference a legacy tip,
@@ -118,8 +118,8 @@ commits with this version.
 
 Commit writers use `.ssc/commit.lock` and publish completed compressed objects
 before replacing the branch history index. If a process is killed, remove a stale
-lock only after verifying no commit is running. This lock serializes commit
-writers; it does not make simultaneous branch switching or deletion safe.
+lock only after verifying no commit is running. This operation lock also covers push, pull, remote configuration, branch, and
+revert commands; commit holds it throughout snapshot creation.
 An interrupted write may leave an unreferenced object or temporary file.
 
 For isolated settings, set `SSC_CONFIG_FILE` to a configuration-file path;
@@ -140,4 +140,25 @@ go build -o ssc .
 
 See [server setup and API documentation](docs/server.md) for the required
 configuration, TLS setup, protocol, and limits. The server requires Go 1.20 or
-newer. Client-side clone/push/pull commands are not implemented yet.
+newer. Client-side clone, push, and fast-forward pull are available. See the
+[client guide](docs/client.md) for setup, authentication, and conflict behavior.
+
+## Clone, push, and pull
+
+```sh
+export SSC_TOKEN='your-access-token'
+ssc clone https://ssc.example.com:8443/v1/repos/demo project
+cd project
+ssc config -c authorName "Your Name"
+ssc config -c authorEmail "you@example.com"
+# Edit files, then:
+ssc commit -m "Implement a feature"
+ssc push
+# Get new commits from teammates:
+ssc pull
+```
+
+The server repository must already exist. To connect an existing local SSC
+repository, run `ssc remote <repository-url>`. Push sends only missing objects;
+pull rejects uncommitted changes and divergent history. Read the [client
+guide](docs/client.md) for checkout recovery and current limits.

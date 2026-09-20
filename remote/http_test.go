@@ -2,9 +2,12 @@ package remote
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 )
 
@@ -21,8 +24,8 @@ func TestURLValidation(t *testing.T) {
 	}
 }
 func TestRedirectsDoNotForwardTokens(t *testing.T) {
-	leaked := false
-	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { leaked = true }))
+	var leaked atomic.Bool
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { leaked.Store(true) }))
 	defer target.Close()
 	source := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, target.URL, 302) }))
 	defer source.Close()
@@ -33,7 +36,7 @@ func TestRedirectsDoNotForwardTokens(t *testing.T) {
 	if _, err := c.Refs(context.Background()); err == nil {
 		t.Fatal("redirect accepted")
 	}
-	if leaked {
+	if leaked.Load() {
 		t.Fatal("token forwarded")
 	}
 }
@@ -46,5 +49,28 @@ func TestRejectTamperedDownload(t *testing.T) {
 	c, _ := NewClient(srv.URL+"/v1/repos/demo", "secret")
 	if _, err := c.Get(context.Background(), strings.Repeat("a", 40), "blob"); err == nil {
 		t.Fatal("tampered object accepted")
+	}
+}
+
+func TestConditionalUpdateConflictIsNotRetried(t *testing.T) {
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		var update map[string]string
+		if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+			t.Error(err)
+		}
+		if update["old"] != strings.Repeat("a", 40) || update["new"] != strings.Repeat("b", 40) {
+			t.Error(update)
+		}
+		w.WriteHeader(http.StatusConflict)
+	}))
+	defer srv.Close()
+	c, _ := NewClient(srv.URL+"/v1/repos/demo", "secret")
+	if err := c.Update(context.Background(), "main", strings.Repeat("a", 40), strings.Repeat("b", 40)); !errors.Is(err, ErrConflict) {
+		t.Fatal(err)
+	}
+	if calls.Load() != 1 {
+		t.Fatal("conflicting update retried")
 	}
 }
