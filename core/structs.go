@@ -7,8 +7,12 @@ package core
 
 // Commit is a commit object
 type Commit struct {
-	Tree    string
-	Date    string
-	Message string
-	Branch  string
+	Format      int
+	Parents     []string
+	AuthorName  string
+	AuthorEmail string
+	Tree        string
+	Date        string
+	Message     string
+	Branch      string
 }
