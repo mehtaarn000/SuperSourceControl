@@ -114,6 +114,9 @@ func Run(ctx context.Context, args []string, out io.Writer) error {
 		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 << 10,
 		BaseContext: func(net.Listener) context.Context { return ctx },
 	}
+	// Do not release the storage lock while an in-flight handler can still write.
+	defer handler.closeAndWait()
+	defer srv.Close()
 	finished := make(chan error, 1)
 	go func() { finished <- srv.Serve(listener) }()
 	fmt.Fprintf(out, "Serving SSC on %s://%s\n", scheme, listener.Addr())

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"ssc/core"
+	"strings"
 )
 
 const MaxGraphObjects = 10000
@@ -65,6 +66,11 @@ func (s *Store) UpdateRef(ctx context.Context, repo, branch, old, next string) e
 	if err != nil {
 		return err
 	}
+	for name := range refs {
+		if name != branch && (strings.HasPrefix(name, branch+"/") || strings.HasPrefix(branch, name+"/")) {
+			return fmt.Errorf("%w: branch namespace collision", ErrConflict)
+		}
+	}
 	if refs[branch] != old {
 		return ErrConflict
 	}
@@ -91,6 +97,7 @@ func (s *Store) validateGraph(ctx context.Context, repo, tip string) (map[string
 	seen := map[string]string{}
 	commits := map[string]bool{}
 	total := 0
+	references := 1
 	for len(pending) > 0 {
 		if err := ctx.Err(); err != nil {
 			return nil, err
@@ -121,6 +128,10 @@ func (s *Store) validateGraph(ctx context.Context, repo, tip string) (map[string
 		seen[ref.Hash] = obj.Type
 		if obj.Type == "commit" {
 			commits[ref.Hash] = true
+		}
+		references += len(children)
+		if references > MaxGraphObjects {
+			return nil, ErrGraphLimit
 		}
 		pending = append(pending, children...)
 	}

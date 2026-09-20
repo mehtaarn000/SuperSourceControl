@@ -101,7 +101,8 @@ ordinary commits currently write at most one. The Go API
 `core.IsAncestor(ancestor, descendant)` traverses stored parent links, independent
 of branch logs. It returns an error for missing/corrupt objects and
 `core.ErrLegacyHistory` when older objects prevent a definitive negative answer.
-No merge, push, pull, or server functionality is included yet.
+No merge, push, or pull CLI functionality is included yet; the shared server
+API is described below.
 
 Existing objects are never rewritten. Legacy commits remain readable and appear
 in branch history with an unknown author. New commits can reference a legacy tip,
@@ -124,3 +125,19 @@ An interrupted write may leave an unreferenced object or temporary file.
 For isolated settings, set `SSC_CONFIG_FILE` to a configuration-file path;
 otherwise SSC uses `~/.sscconfig.json`. Existing configurations need only the two
 new author settings, and other preferences are preserved.
+
+## Shared repository server
+
+SSC includes a Go HTTP server for shared object storage and branch tips, with
+hashed bearer-token authentication, repository-specific read/write permissions,
+and conditional branch updates that reject stale or divergent writes.
+
+```sh
+go build -o ssc .
+./ssc serve --generate-token
+./ssc serve --config server.json --data /path/to/ssc-server-data
+```
+
+See [server setup and API documentation](docs/server.md) for the required
+configuration, TLS setup, protocol, and limits. The server requires Go 1.20 or
+newer. Client-side clone/push/pull commands are not implemented yet.

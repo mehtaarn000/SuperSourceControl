@@ -130,3 +130,25 @@ func TestCommitCLIIdentityParentsAndLog(t *testing.T) {
 	}
 	run(true, "", "log", "-m") // Reading history does not require configured identity.
 }
+
+func TestServeCommandDoesNotRequireLocalRepository(t *testing.T) {
+	root := t.TempDir()
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	config := filepath.Join(root, "must-not-be-created.json")
+	command := exec.Command(executable, "-test.run=^TestCLIProcess$", "--", "serve", "--help")
+	command.Dir = root
+	command.Env = append(os.Environ(), "SSC_TEST_PROCESS=1", "SSC_CONFIG_FILE="+config)
+	data, err := command.CombinedOutput()
+	if err != nil || !strings.Contains(string(data), "listen") {
+		t.Fatalf("%s %v", data, err)
+	}
+	if _, err := os.Stat(config); !os.IsNotExist(err) {
+		t.Fatal("serve touched author configuration")
+	}
+	if _, err := os.Stat(filepath.Join(root, ".ssc")); !os.IsNotExist(err) {
+		t.Fatal("serve initialized a local repository")
+	}
+}

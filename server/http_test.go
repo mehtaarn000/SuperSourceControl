@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"net/http/httptest"
 	"ssc/core"
 	"strings"
@@ -70,6 +71,35 @@ func TestHTTPRejectsOversizeAndTraversal(t *testing.T) {
 		t.Fatal(w.Code)
 	}
 	if w := request(h, "GET", "/healthz", "", "", nil); w.Code != 200 {
+		t.Fatal(w.Code)
+	}
+}
+
+func TestInterruptedUploadAndDuplicateAuthorization(t *testing.T) {
+	h, s := testHandler(t)
+	hash, _, _ := core.InspectObject("blob", []byte("partial"))
+	route := "/v1/repos/demo/objects/" + hash
+	r := httptest.NewRequest("PUT", route, &brokenReader{})
+	r.Header.Set("Authorization", "Bearer write-secret")
+	r.Header.Set("Content-Type", "application/octet-stream")
+	r.Header.Set("X-SSC-Object-Type", "blob")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != 400 {
+		t.Fatal(w.Code)
+	}
+	if _, err := s.GetObject("demo", hash); !errors.Is(err, ErrNotFound) {
+		t.Fatal("partial upload persisted")
+	}
+	if w := request(h, "PUT", route, "write-secret", "blob", []byte("partial")); w.Code != 204 {
+		t.Fatal("retry failed", w.Code)
+	}
+	r = httptest.NewRequest("GET", route, nil)
+	r.Header.Add("Authorization", "Bearer read-secret")
+	r.Header.Add("Authorization", "Bearer write-secret")
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != 401 {
 		t.Fatal(w.Code)
 	}
 }

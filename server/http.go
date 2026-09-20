@@ -9,12 +9,16 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Handler struct {
-	store *Store
-	auth  *Authorizer
-	slots chan struct{}
+	store   *Store
+	auth    *Authorizer
+	slots   chan struct{}
+	stateMu sync.Mutex
+	closing bool
+	active  sync.WaitGroup
 }
 
 func NewHandler(s *Store, c Config) (*Handler, error) {
@@ -59,7 +63,24 @@ func methodNotAllowed(w http.ResponseWriter, allow string) {
 	fail(w, 405, "method not allowed")
 }
 
+func (h *Handler) closeAndWait() {
+	h.stateMu.Lock()
+	h.closing = true
+	h.stateMu.Unlock()
+	h.active.Wait()
+}
+
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.stateMu.Lock()
+	if h.closing {
+		h.stateMu.Unlock()
+		fail(w, 503, "server shutting down")
+		return
+	}
+	h.active.Add(1)
+	h.stateMu.Unlock()
+	defer h.active.Done()
+
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	if r.URL.Path == "/healthz" {

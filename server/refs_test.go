@@ -114,3 +114,46 @@ func TestRefHTTPRequiresExpectedTipAndWriteAccess(t *testing.T) {
 		t.Fatal(w)
 	}
 }
+
+func TestRefValidationRejectsNamespaceCollisionsAndWrongTypes(t *testing.T) {
+	s := testStore(t)
+	tip := testCommit(t, s, "root")
+	ctx := context.Background()
+	if err := s.UpdateRef(ctx, "demo", "feature/one", "", tip); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.UpdateRef(ctx, "demo", "feature", "", tip); !errors.Is(err, ErrConflict) {
+		t.Fatal("namespace collision accepted", err)
+	}
+	if err := s.UpdateRef(ctx, "demo", "feature/one/child", "", tip); !errors.Is(err, ErrConflict) {
+		t.Fatal("namespace collision accepted", err)
+	}
+	blob := putTestObject(t, s, "blob", []byte("not a tree"))
+	wrong := putTestObject(t, s, "commit", commitBody(blob, "wrong type"))
+	if err := s.UpdateRef(ctx, "demo", "bad", "", wrong); !errors.Is(err, ErrIncomplete) {
+		t.Fatal("wrong object type accepted", err)
+	}
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if err := s.UpdateRef(canceled, "demo", "canceled", "", tip); !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+}
+
+func TestGraphReferenceLimit(t *testing.T) {
+	s := testStore(t)
+	blob := putTestObject(t, s, "blob", []byte("shared"))
+	var tree strings.Builder
+	for i := 0; i < MaxGraphObjects; i++ {
+		fmt.Fprintf(&tree, "file%d %s\n", i, blob)
+	}
+	treeID := putTestObject(t, s, "tree", []byte(tree.String()))
+	commit := putTestObject(t, s, "commit", commitBody(treeID, "too many references"))
+	if err := s.UpdateRef(context.Background(), "demo", "main", "", commit); !errors.Is(err, ErrGraphLimit) {
+		t.Fatal("graph limit not enforced", err)
+	}
+	refs, err := s.ListRefs("demo")
+	if err != nil || len(refs) != 0 {
+		t.Fatal("limit failure changed refs", refs, err)
+	}
+}
