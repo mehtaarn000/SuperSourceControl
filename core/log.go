@@ -1,78 +1,56 @@
-/* Copyright © 2021
-Author : mehtaarn000
-Email : arnavm834@gmail.com
-*/
-
 package core
 
 import (
-	"io/ioutil"
+	"fmt"
 	"ssc/utils"
 	"strings"
 )
 
-// Log lists the commits from the commitlog
+// Branch logs remain display indexes so pre-format-2 history stays visible.
 func Log(commits int, reverse bool) {
-	// Get commits
-	currentbranch, err := ioutil.ReadFile(".ssc/branch")
-
-	bytescommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
-	commitlog := strings.Split(string(bytescommitlog), "\n")
-	commitlog = commitlog[:len(commitlog)-1]
-
-	if commits > len(commitlog) {
-		utils.Exit("Number of requested commits is too large")
-	}
-
-	//Get number of commits passed to function
-	requested_commits := commitlog[len(utils.DeleteEmpty(commitlog))-commits:]
+	branch, err := currentBranch()
 	if err != nil {
 		utils.Exit(err)
 	}
-
-	//If the user doesn't specify the reverse option
+	history, err := readBranchLog(branch)
+	if err != nil {
+		utils.Exit(err)
+	}
+	if commits < 0 || commits > len(history) {
+		utils.Exit("Requested commit count is outside the available history")
+	}
+	selected := append([]string(nil), history[len(history)-commits:]...)
 	if !reverse {
-		requested_commits = utils.ReverseArray(requested_commits)
+		for left, right := 0, len(selected)-1; left < right; left, right = left+1, right-1 {
+			selected[left], selected[right] = selected[right], selected[left]
+		}
 	}
-
-	for _, commit := range requested_commits {
-		//Get content of each commit
-		content := getContent(commit)
-		split_content := strings.Split(content, "\n")
-
-		//Slice the string to get the date and message
-		date := split_content[1][5:]
-		message := split_content[4]
-
-		/*Output looks like:
-		$COMMITHASH   $COMMITDATEANDTIME   $COMMITMESSAGE
-		*/
-		print(commit, "   ", date, "   ", message, "\n")
-	}
-
-	if err != nil {
-		utils.Exit(err)
+	for _, hash := range selected {
+		c, err := ReadCommit(hash)
+		if err != nil {
+			utils.Exit(err)
+		}
+		fmt.Println(formatLogEntry(hash, c))
 	}
 }
 
-// MaxLog gets all the commits and logs them
-func MaxLog(reverse bool) {
-
-	currentbranch, err := ioutil.ReadFile(".ssc/branch")
-
-	bytescommitlog, err := ioutil.ReadFile(".ssc/branches/" + string(currentbranch) + "/commitlog")
-	commits := strings.Split(string(bytescommitlog), "\n")
-	commits = utils.DeleteEmpty(commits)
-	numofcommits := len(commits)
-
-	if reverse {
-		Log(numofcommits, true)
-		return
+func formatLogEntry(hash string, c Commit) string {
+	author := "unknown author (legacy commit)"
+	if c.Format == 2 {
+		author = c.AuthorName + " <" + c.AuthorEmail + ">"
 	}
+	subject := strings.SplitN(c.Message, "\n", 2)[0]
+	return fmt.Sprintf("%s   %s   %s   %s", hash, c.Date, author, subject)
+}
 
-	Log(numofcommits, false)
-
+func MaxLog(reverse bool) {
+	branch, err := currentBranch()
 	if err != nil {
 		utils.Exit(err)
 	}
+	history, err := readBranchLog(branch)
+	if err != nil {
+		utils.Exit(err)
+	}
+	Log(len(history), reverse)
 }

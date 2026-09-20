@@ -246,29 +246,27 @@ func main() {
 		// Log n number of commits
 		case "-n", "--number":
 
-			if args[3] == "" {
+			if len(args) != 4 {
 				utils.Exit("Flag 'n' or 'number' requires a value.")
 			}
 
 			arg, err := strconv.ParseInt(args[3], 10, 64)
-			core.Log(int(arg), false)
-
 			if err != nil {
 				utils.Exit(err)
 			}
+			core.Log(int(arg), false)
 
 		case "-r", "--reverse":
 			// Log n number of commits from first to last
-			if args[3] == "" {
+			if len(args) != 4 {
 				utils.Exit("Flag 'r' or 'reverse' requires a value.")
 			}
 
 			arg, err := strconv.ParseInt(args[3], 10, 64)
-			core.Log(int(arg), true)
-
 			if err != nil {
 				utils.Exit(err)
 			}
+			core.Log(int(arg), true)
 
 		case "-m", "--max":
 			// Log all commits

@@ -54,7 +54,7 @@ func snapshot(t *testing.T, message string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	CreateCommit(Commit{Tree: CreateTree(), Date: "2026-09-17T12:00:00Z", Message: message, Branch: branch})
+	CreateCommit(Commit{AuthorName: "Test Developer", AuthorEmail: "test@example.com", Tree: CreateTree(), Date: "2026-09-17T12:00:00Z", Message: message, Branch: branch})
 }
 
 func TestBranchNames(t *testing.T) {

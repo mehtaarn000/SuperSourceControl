@@ -17,60 +17,6 @@ import (
 	"golang.org/x/crypto/ripemd160"
 )
 
-// CreateCommit creates a commit, compresses it, and writes it to a file.
-func CreateCommit(c Commit) {
-	/* Commit object looks like this
-	tree $treehash
-	date $date
-	branch $branch
-	author $author
-
-	$COMMITMSG
-	*/
-
-	commit := ""
-	commit += "tree " + c.Tree + "\n"
-	commit += "date " + c.Date + "\n"
-	commit += "branch " + c.Branch + "\n\n"
-	commit += c.Message
-
-	/* Commit hash is calculated like:
-	commit $LENGTHOFCOMMITOBJECT $COMMITOBJECT
-	*/
-
-	commitlen := string(rune(len(commit)))
-	lenoflen := len(commitlen)
-	commit = "commit " + commitlen + commit
-
-	// Calculate hash
-	hasher := ripemd160.New()
-	hasher.Write([]byte(commit))
-	hash := hex.EncodeToString(hasher.Sum(nil))
-
-	// Write it to a file
-	filename := ".ssc/objects/" + hash
-	writer, err := os.Create(filename)
-	writer.WriteString(commit[7+lenoflen:])
-	zlibutils.CompressFile(map[string]string{filename: hash})
-
-	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0644)
-	defer f.Close()
-
-	f.WriteString(hash + "\n")
-
-	// Write commit to commitlog
-	writeToLog, err := os.OpenFile(".ssc/branches/"+c.Branch+"/commitlog", os.O_APPEND|os.O_WRONLY, 0644)
-	defer writeToLog.Close()
-	writeToLog.WriteString(hash + "\n")
-
-	println(hash)
-
-	if err != nil {
-		utils.Exit(err)
-	}
-
-}
-
 // CreateTree creates a tree object
 func CreateTree() string {
 	// Get all file names in directory
