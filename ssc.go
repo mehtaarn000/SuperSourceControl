@@ -13,11 +13,11 @@ import (
 	"os/exec"
 	"os/signal"
 	"ssc/core"
+	"ssc/remote"
 	"ssc/server"
 	"ssc/utils"
 	"strconv"
 	"syscall"
-	"time"
 )
 
 func main() {
@@ -43,6 +43,15 @@ func main() {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 		if err := server.Run(ctx, args[2:], os.Stdout); err != nil {
+			utils.Exit(err)
+		}
+		return
+	}
+
+	if args[1] == "clone" || args[1] == "push" || args[1] == "pull" || args[1] == "remote" {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		if err := remote.Run(ctx, args[1:], os.Stdout); err != nil {
 			utils.Exit(err)
 		}
 		return
@@ -147,120 +156,73 @@ func main() {
 		}
 
 	case "commit":
-
 		if len(args) < 3 {
-			utils.Exit("Command 'commit' requires a flag and an argument.")
+			utils.Exit(core.CommitUsage)
 		}
-
-		authorName, authorEmail := "", ""
-		if args[2] != "-h" && args[2] != "--help" {
-			var err error
-			authorName, authorEmail, err = core.ConfiguredAuthor()
-			if err != nil {
-				utils.Exit(err)
-			}
+		if args[2] == "-h" || args[2] == "--help" {
+			println(core.CommitUsage)
+			return
 		}
-
+		authorName, authorEmail, err := core.ConfiguredAuthor()
+		if err != nil {
+			utils.Exit(err)
+		}
+		var message string
 		switch args[2] {
-		// Specify a message, create a commit with given message, and output the new commit hash
 		case "-m", "--message":
-			if len(args) < 4 {
-				utils.Exit("Flag 'm' or 'message' requires a value.")
+			if len(args) != 4 {
+				utils.Exit(core.CommitUsage)
 			}
-
-			tree := core.CreateTree()
-			file, err := ioutil.ReadFile(".ssc/branch")
-
-			if err != nil {
-				utils.Exit(err)
-			}
-
-			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: args[3], Branch: string(file)}
-			core.CreateCommit(commit)
-
+			message = args[3]
 		case "-p", "--prompt":
-			// Input a message
+			if len(args) != 3 {
+				utils.Exit(core.CommitUsage)
+			}
+			print(core.GetSetting("commitMessagePrompt"))
 			scanner := bufio.NewScanner(os.Stdin)
-
-			prompt_message := core.GetSetting("commitMessagePrompt")
-
-			print(prompt_message)
 			if !scanner.Scan() {
 				if err := scanner.Err(); err != nil {
 					utils.Exit(err)
 				}
 				utils.Exit("No commit message received")
 			}
-
-			input := scanner.Text()
-
-			tree := core.CreateTree()
-			file, err := ioutil.ReadFile(".ssc/branch")
-
-			if err != nil {
-				utils.Exit(err)
-			}
-
-			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: input, Branch: string(file)}
-			core.CreateCommit(commit)
-
-		case "-e", "--editor":
-			// Open editor with file: .ssc/tmp/message.txt
-			// Message is read from file when editor is exited
-			// Create a commit with this message
-
-			editor := ""
-			if len(args) < 4 {
-				editor = core.GetSetting("editor")
-			} else {
-				editor = args[3]
-			}
-
-			cmd := exec.Command(editor, ".ssc/tmp/message.txt")
-			err := cmd.Run()
-			if err != nil {
-				utils.Exit(err)
-			}
-
-			branch, err := ioutil.ReadFile(".ssc/branch")
-			if err != nil {
-				utils.Exit(err)
-			}
-			message, err := ioutil.ReadFile(".ssc/tmp/message.txt")
-
-			if err != nil {
-				utils.Exit(err)
-			}
-
-			tree := core.CreateTree()
-			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
-			core.CreateCommit(commit)
-
+			message = scanner.Text()
 		case "-f", "--file":
-			// Read commit message from file
-			if len(args) < 4 {
-				utils.Exit("Flag 'f' requires a value.")
+			if len(args) != 4 {
+				utils.Exit(core.CommitUsage)
 			}
-
-			message, err := ioutil.ReadFile(args[3])
+			data, err := ioutil.ReadFile(args[3])
 			if err != nil {
 				utils.Exit(err)
 			}
-			branch, err := ioutil.ReadFile(".ssc/branch")
-
+			message = string(data)
+		case "-e", "--editor":
+			if len(args) > 4 {
+				utils.Exit(core.CommitUsage)
+			}
+			editor := ""
+			if len(args) == 4 {
+				editor = args[3]
+			} else {
+				editor = core.GetSetting("editor")
+			}
+			cmd := exec.Command(editor, ".ssc/tmp/message.txt")
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				utils.Exit(err)
+			}
+			data, err := ioutil.ReadFile(".ssc/tmp/message.txt")
 			if err != nil {
 				utils.Exit(err)
 			}
-
-			tree := core.CreateTree()
-			commit := core.Commit{AuthorName: authorName, AuthorEmail: authorEmail, Tree: tree, Date: time.Now().Format(time.RFC3339), Message: string(message), Branch: string(branch)}
-			core.CreateCommit(commit)
-
-		case "-h", "--help":
-			println(core.CommitUsage)
-
+			message = string(data)
 		default:
-			println(core.CommitUsage)
+			utils.Exit(core.CommitUsage)
+		}
+		if err := core.CommitWorkingTree(message, authorName, authorEmail); err != nil {
+			utils.Exit(err)
 		}
 
 	case "log":
