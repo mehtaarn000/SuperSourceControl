@@ -44,6 +44,10 @@ func storeError(w http.ResponseWriter, err error) {
 		fail(w, 404, "not found")
 	case errors.Is(err, ErrInvalid):
 		fail(w, 400, "invalid object or request")
+	case errors.Is(err, ErrIncomplete):
+		fail(w, 422, "upload the complete valid object graph before updating a branch")
+	case errors.Is(err, ErrGraphLimit):
+		fail(w, 422, "object graph exceeds server validation limits")
 	case errors.Is(err, ErrConflict):
 		fail(w, 409, "branch tip conflict")
 	default:
@@ -101,6 +105,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if parts[3] == "objects" && len(parts) == 5 {
 		h.object(w, r, repo, parts[4])
+		return
+	}
+	if parts[3] == "refs" {
+		h.refs(w, r, repo, strings.Join(parts[4:], "/"))
 		return
 	}
 	fail(w, 404, "not found")
