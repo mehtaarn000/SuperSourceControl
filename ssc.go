@@ -7,12 +7,16 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/signal"
 	"ssc/core"
+	"ssc/server"
 	"ssc/utils"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -33,6 +37,15 @@ func main() {
 	if args[1] == "-h" || args[1] == "--help" {
 		println(core.Usage)
 		os.Exit(0)
+	}
+
+	if args[1] == "serve" {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		if err := server.Run(ctx, args[2:], os.Stdout); err != nil {
+			utils.Exit(err)
+		}
+		return
 	}
 
 	core.EnsureConfig()

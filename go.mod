@@ -1,6 +1,6 @@
 module ssc
 
-go 1.15
+go 1.20
 
 require (
 	github.com/tidwall/sjson v1.1.6

@@ -7,6 +7,7 @@ package core
 
 const Usage = `Usage of ssc:
 Standard:
+	serve --config <file> --data <directory> Run the shared repository server
 	commit [flags] (argument) [options] Create a commit
 	log [flags] (argument) List recent commits
 	init [-b | --branch-name <branch>] Initialize a repository
