@@ -75,3 +75,18 @@ func TestCommitMetadataValidationAndHashing(t *testing.T) {
 		}
 	}
 }
+
+func TestLogEntryHandlesNewAndLegacyMessages(t *testing.T) {
+	c := exampleCommit()
+	entry := formatLogEntry(strings.Repeat("a", 40), c)
+	if !strings.Contains(entry, "Example Developer <dev@example.com>") || !strings.HasSuffix(entry, "subject") || strings.Contains(entry, "body") {
+		t.Fatal(entry)
+	}
+	c.Format = 1
+	c.AuthorName = ""
+	c.AuthorEmail = ""
+	c.Message = ""
+	if !strings.Contains(formatLogEntry("legacy", c), "unknown author (legacy commit)") {
+		t.Fatal("legacy author was invented")
+	}
+}

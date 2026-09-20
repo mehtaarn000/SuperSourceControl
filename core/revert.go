@@ -42,15 +42,11 @@ func readObject(hash string) ([]byte, error) {
 }
 
 func restoreSnapshot(hash string) error {
-	commit, err := readObject(hash)
+	commit, err := ReadCommit(hash)
 	if err != nil {
 		return err
 	}
-	first := strings.SplitN(string(commit), "\n", 2)[0]
-	if !strings.HasPrefix(first, "tree ") {
-		return fmt.Errorf("object is not a commit: %s", hash)
-	}
-	tree, err := readObject(strings.TrimPrefix(first, "tree "))
+	tree, err := readObject(commit.Tree)
 	if err != nil {
 		return err
 	}

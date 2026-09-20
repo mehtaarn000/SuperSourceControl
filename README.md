@@ -17,6 +17,13 @@ cd testdir
 ssc init
 ```
 
+Configure your identity once (also works before `ssc init`):
+
+```sh
+ssc config -c authorName "Your Name"
+ssc config -c authorEmail "you@example.com"
+```
+
 Then, create a file and commit:
 ```sh
 touch "hello world" > helloworld.txt
@@ -75,3 +82,45 @@ restoration can still leave a partially restored working directory.
 Run `go test ./...` for initialization and branch regression tests, and
 `go build -o ssc .` to build the CLI. Branch-name validation uses the Go standard
 library and does not require PCRE.
+
+## Commit authors and ancestry
+
+New commits store the configured author name and email, timestamp, tree hash,
+branch name, and parent commit hash. The first commit has no parents; later
+commits point to the active branch's latest commit. Branches share their common
+ancestor and develop separate parent chains. All four commit-message modes
+(`-m`, `-p`, `-f`, and `-e`) use the same identity and parent handling.
+
+`ssc log -m` displays the author alongside each commit's date and subject.
+`ssc cat-file -c <hash>` displays the full commit, including its parent header.
+Author information is self-declared metadata, not authentication or a signature.
+Changing your configuration affects future commits only.
+
+The format supports multiple parent headers for a future merge implementation;
+ordinary commits currently write at most one. The Go API
+`core.IsAncestor(ancestor, descendant)` traverses stored parent links, independent
+of branch logs. It returns an error for missing/corrupt objects and
+`core.ErrLegacyHistory` when older objects prevent a definitive negative answer.
+No merge, push, pull, or server functionality is included yet.
+
+Existing objects are never rewritten. Legacy commits remain readable and appear
+in branch history with an unknown author. New commits can reference a legacy tip,
+but older ancestry cannot be inferred from those objects. Branch logs remain
+history indexes to retain access to legacy entries.
+
+Version 2 commits use `format 2`, `author-name`, `author-email`, and zero or more
+`parent` headers before the blank line separating the message. Their object ID is
+the RIPEMD-160 hash of `commit <decimal byte length>\0<body>`; all metadata is
+included, and the commit reader verifies the ID. Tree/blob formats are unchanged.
+Older SSC binaries do not understand the new metadata; upgrade before writing
+commits with this version.
+
+Commit writers use `.ssc/commit.lock` and publish completed compressed objects
+before replacing the branch history index. If a process is killed, remove a stale
+lock only after verifying no commit is running. This lock serializes commit
+writers; it does not make simultaneous branch switching or deletion safe.
+An interrupted write may leave an unreferenced object or temporary file.
+
+For isolated settings, set `SSC_CONFIG_FILE` to a configuration-file path;
+otherwise SSC uses `~/.sscconfig.json`. Existing configurations need only the two
+new author settings, and other preferences are preserved.

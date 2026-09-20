@@ -19,6 +19,7 @@ Inner:
 	hash-object [flags] (argument) Create ssc objects`
 
 const CommitUsage = `Usage of ssc commit:
+Requires authorName and authorEmail (set with ssc config -c).
 Flags:
 	-m [message] Write a commit message
 	-p Input a commit message
@@ -64,6 +65,7 @@ Flags:
 	-h, --help Print this message`
 
 const ConfigUsage = `Usage of ssc config:
+Author settings: authorName, authorEmail
 Flags:
 	-s, --setting [setting] Get a setting
 	-c, --change-setting [setting] [new value] Change a setting

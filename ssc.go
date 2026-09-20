@@ -172,7 +172,12 @@ func main() {
 			prompt_message := core.GetSetting("commitMessagePrompt")
 
 			print(prompt_message)
-			scanner.Scan()
+			if !scanner.Scan() {
+				if err := scanner.Err(); err != nil {
+					utils.Exit(err)
+				}
+				utils.Exit("No commit message received")
+			}
 
 			input := scanner.Text()
 
@@ -200,8 +205,14 @@ func main() {
 
 			cmd := exec.Command(editor, ".ssc/tmp/message.txt")
 			err := cmd.Run()
+			if err != nil {
+				utils.Exit(err)
+			}
 
 			branch, err := ioutil.ReadFile(".ssc/branch")
+			if err != nil {
+				utils.Exit(err)
+			}
 			message, err := ioutil.ReadFile(".ssc/tmp/message.txt")
 
 			if err != nil {
@@ -219,6 +230,9 @@ func main() {
 			}
 
 			message, err := ioutil.ReadFile(args[3])
+			if err != nil {
+				utils.Exit(err)
+			}
 			branch, err := ioutil.ReadFile(".ssc/branch")
 
 			if err != nil {

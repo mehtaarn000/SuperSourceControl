@@ -149,3 +149,29 @@ func TestFailedCommitDoesNotAdvanceHistory(t *testing.T) {
 		t.Fatal("modified metadata accepted")
 	}
 }
+
+func TestMissingParentAndBrokenTipAreErrors(t *testing.T) {
+	inRepository(t, "main")
+	root := commitForTest(t, "root")
+	c := exampleCommit()
+	c.Tree = CreateTree()
+	c.Parents = []string{strings.Repeat("f", 40)}
+	data, err := encodeCommit(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hash := commitObjectID(data)
+	writeObjectForTest(t, hash, data)
+	if _, err := IsAncestor(root, hash); err == nil {
+		t.Fatal("missing parent treated as unrelated history")
+	}
+	before := strings.Repeat("f", 40) + "\n"
+	writeTestFile(t, ".ssc/branches/main/commitlog", before)
+	c.Parents = nil
+	if _, err := createCommit(c); err == nil {
+		t.Fatal("commit accepted unreadable branch tip")
+	}
+	if contents(t, ".ssc/branches/main/commitlog") != before {
+		t.Fatal("broken history overwritten")
+	}
+}
